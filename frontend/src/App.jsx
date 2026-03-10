@@ -7,6 +7,9 @@ import HotelForm from './components/HotelForm'
 import HotelResults from './components/HotelResults'
 import ActivityForm from './components/ActivityForm'
 import ActivityResults from './components/ActivityResults'
+import DomesticForm from './components/DomesticForm'
+import DomesticResults from './components/DomesticResults'
+import AirlineDeals from './components/AirlineDeals'
 import './App.css'
 
 const API = 'http://localhost:8000/api'
@@ -45,6 +48,7 @@ function useSearch(url) {
 
 function App() {
   const [airports, setAirports] = useState({ origins: {}, destinations: {} })
+  const [domesticSearch, setDomesticSearch] = useState(null)
   const [tab, setTab] = useState('search')
 
   const flights = useSearch(`${API}/flights/search`)
@@ -53,17 +57,16 @@ function App() {
   const activities = useSearch(`${API}/activities/search`)
 
   useEffect(() => {
-    fetch(`${API}/airports`)
-      .then(res => res.json())
-      .then(setAirports)
-      .catch(() => {})
+    fetch(`${API}/airports`).then(r => r.json()).then(setAirports).catch(() => {})
   }, [])
 
   const tabs = [
     { id: 'search', label: '항공편' },
     { id: 'cheapest', label: '최저가 목적지' },
-    { id: 'hotels', label: '호텔' },
-    { id: 'activities', label: '액티비티' },
+    { id: 'hotels', label: '해외 호텔' },
+    { id: 'activities', label: '해외 액티비티' },
+    { id: 'domestic', label: '국내여행' },
+    { id: 'airline-deals', label: '항공사 특가' },
   ]
 
   return (
@@ -106,7 +109,7 @@ function App() {
             {cheapest.error && <div className="error-msg">{cheapest.error}</div>}
             {cheapest.loading && <div className="loading">25개 도시 최저가를 비교하고 있습니다...</div>}
             {!cheapest.loading && cheapest.searched && (
-              <CheapestResults destinations={cheapest.data?.destinations || []} />
+              <CheapestResults destinations={cheapest.data?.destinations || []} mode={cheapest.data?.mode || 'international'} />
             )}
           </>
         )}
@@ -131,6 +134,25 @@ function App() {
               <ActivityResults activities={activities.data?.activities || []} />
             )}
           </>
+        )}
+
+        {tab === 'domestic' && (
+          <>
+            <DomesticForm onSearch={setDomesticSearch} loading={false} />
+            {domesticSearch && (
+              <DomesticResults
+                regionName={domesticSearch.regionName}
+                keyword={domesticSearch.keyword}
+                checkIn={domesticSearch.check_in}
+                checkOut={domesticSearch.check_out}
+                adults={domesticSearch.adults}
+              />
+            )}
+          </>
+        )}
+
+        {tab === 'airline-deals' && (
+          <AirlineDeals />
         )}
       </main>
     </div>

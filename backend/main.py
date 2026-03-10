@@ -54,6 +54,7 @@ class CheapestDestinationsRequest(BaseModel):
     children: int = 0
     infants_in_seat: int = 0
     infants_on_lap: int = 0
+    mode: str = "international"  # "international" | "domestic" | "all"
 
 
 class HotelSearchRequest(BaseModel):
@@ -67,7 +68,104 @@ class ActivitySearchRequest(BaseModel):
     destination: str
 
 
+class DomesticSearchRequest(BaseModel):
+    region: str
+    check_in: str
+    check_out: str
+    adults: int = 2
+
+
 # ── Data ──
+
+DOMESTIC_REGIONS = {
+    "jeju":      {"name": "제주",    "keyword": "제주"},
+    "busan":     {"name": "부산",    "keyword": "부산"},
+    "sokcho":    {"name": "속초",    "keyword": "속초"},
+    "gangneung": {"name": "강릉",    "keyword": "강릉"},
+    "gyeongju":  {"name": "경주",    "keyword": "경주"},
+    "yeosu":     {"name": "여수",    "keyword": "여수"},
+    "jeonju":    {"name": "전주",    "keyword": "전주"},
+    "tongyeong": {"name": "통영",    "keyword": "통영"},
+    "gapyeong":  {"name": "가평",    "keyword": "가평"},
+    "seoul":     {"name": "서울",    "keyword": "서울"},
+    "incheon":   {"name": "인천",    "keyword": "인천"},
+    "daegu":     {"name": "대구",    "keyword": "대구"},
+    "gwangju":   {"name": "광주",    "keyword": "광주"},
+    "daejeon":   {"name": "대전",    "keyword": "대전"},
+    "chuncheon": {"name": "춘천",    "keyword": "춘천"},
+    "namhae":    {"name": "남해",    "keyword": "남해"},
+    "boryeong":  {"name": "보령",    "keyword": "보령"},
+    "yangyang":  {"name": "양양",    "keyword": "양양"},
+}
+
+AIRLINE_DEALS = [
+    {
+        "airline": "대한항공",
+        "logo": "KE",
+        "description": "대한항공 공식 특가 이벤트 및 프로모션",
+        "url": "https://www.koreanair.com/content/koreanair/kr/ko/offers/promotions.html",
+    },
+    {
+        "airline": "아시아나항공",
+        "logo": "OZ",
+        "description": "아시아나항공 특가 이벤트 및 얼리버드",
+        "url": "https://flyasiana.com/C/KR/KO/event/eventList",
+    },
+    {
+        "airline": "진에어",
+        "logo": "LJ",
+        "description": "진에어 특가 & 프로모션 이벤트",
+        "url": "https://www.jinair.com/promotion/list",
+    },
+    {
+        "airline": "제주항공",
+        "logo": "7C",
+        "description": "제주항공 땡처리 특가 이벤트",
+        "url": "https://www.jejuair.net/ko/promotion",
+    },
+    {
+        "airline": "티웨이항공",
+        "logo": "TW",
+        "description": "티웨이항공 특가 & 이벤트",
+        "url": "https://www.twayair.com/app/promotionEvents/promotionEventsList",
+    },
+    {
+        "airline": "에어부산",
+        "logo": "BX",
+        "description": "에어부산 특가 프로모션",
+        "url": "https://www.airbusan.com/promotion/list",
+    },
+    {
+        "airline": "에어서울",
+        "logo": "RS",
+        "description": "에어서울 특가 이벤트",
+        "url": "https://www.airseoul.com/promotion",
+    },
+    {
+        "airline": "에어프레미아",
+        "logo": "YP",
+        "description": "에어프레미아 특가 & 프로모션",
+        "url": "https://www.airpremia.com/promotion",
+    },
+    {
+        "airline": "땡처리닷컴",
+        "logo": "땡",
+        "description": "항공권·여행 땡처리 특가 모음",
+        "url": "https://www.ttour.com/flight",
+    },
+    {
+        "airline": "스카이스캐너",
+        "logo": "SK",
+        "description": "전 세계 항공사 최저가 비교",
+        "url": "https://www.skyscanner.co.kr/flights",
+    },
+    {
+        "airline": "클룩",
+        "logo": "KL",
+        "description": "항공권·패스·체험 특가 이벤트",
+        "url": "https://www.klook.com/ko/flights/",
+    },
+]
 
 KOREAN_AIRPORTS = {
     "ICN": "인천국제공항",
@@ -75,6 +173,21 @@ KOREAN_AIRPORTS = {
     "PUS": "김해국제공항",
     "CJU": "제주국제공항",
     "TAE": "대구국제공항",
+}
+
+DOMESTIC_DESTINATIONS = {
+    "CJU": {"name": "제주",       "country": "국내"},
+    "PUS": {"name": "부산 (김해)", "country": "국내"},
+    "TAE": {"name": "대구",       "country": "국내"},
+    "RSU": {"name": "여수",       "country": "국내"},
+    "KWJ": {"name": "광주",       "country": "국내"},
+    "CJJ": {"name": "청주",       "country": "국내"},
+    "YNY": {"name": "양양",       "country": "국내"},
+    "KPO": {"name": "포항 (경주)", "country": "국내"},
+    "USN": {"name": "울산",       "country": "국내"},
+    "MWX": {"name": "무안",       "country": "국내"},
+    "HIN": {"name": "진주 (사천)", "country": "국내"},
+    "WJU": {"name": "원주",       "country": "국내"},
 }
 
 POPULAR_DESTINATIONS = {
@@ -191,18 +304,43 @@ def trip_com_url(origin, destination, departure_date, return_date=None,
     return base
 
 
+def naver_flights_domestic_url(origin, destination, departure_date, return_date=None,
+                               adults=1, children=0, infants=0):
+    """네이버 항공 국내선 URL"""
+    dep = departure_date.replace("-", "")
+    base = f"https://flight.naver.com/flights/domestic/{origin}-{destination}/{dep}?adult={adults}"
+    if children > 0:
+        base += f"&child={children}"
+    if infants > 0:
+        base += f"&infant={infants}"
+    if return_date:
+        ret = return_date.replace("-", "")
+        base = f"https://flight.naver.com/flights/domestic/{origin}-{destination}/{dep}/{destination}-{origin}/{ret}?adult={adults}"
+        if children > 0:
+            base += f"&child={children}"
+        if infants > 0:
+            base += f"&infant={infants}"
+    return base
+
+
 def _booking_links(origin, destination, departure_date, return_date=None,
-                   adults=1, children=0, infants_in_seat=0, infants_on_lap=0):
-    """3개 사이트 예약 링크 생성"""
+                   adults=1, children=0, infants_in_seat=0, infants_on_lap=0,
+                   domestic=False):
+    """예약 링크 생성 (국내/해외 구분)"""
     infants = infants_in_seat + infants_on_lap
-    return {
+    links = {
         "google_flights": google_flights_url(origin, destination, departure_date, return_date,
                                              adults, children, infants_in_seat, infants_on_lap),
-        "kayak": kayak_url(origin, destination, departure_date, return_date,
-                           adults, children, infants),
-        "trip_com": trip_com_url(origin, destination, departure_date, return_date,
-                                 adults, children, infants),
     }
+    if domestic:
+        links["naver_flights"] = naver_flights_domestic_url(
+            origin, destination, departure_date, return_date, adults, children, infants)
+    else:
+        links["kayak"] = kayak_url(origin, destination, departure_date, return_date,
+                                   adults, children, infants)
+        links["trip_com"] = trip_com_url(origin, destination, departure_date, return_date,
+                                         adults, children, infants)
+    return links
 
 
 def _parse_aria_label(label):
@@ -391,7 +529,10 @@ executor = ThreadPoolExecutor(max_workers=3)
 
 
 def _search_one_destination(origin, dest_code, departure_date, return_date, adults,
-                             children=0, infants_in_seat=0, infants_on_lap=0):
+                             children=0, infants_in_seat=0, infants_on_lap=0,
+                             destinations_db=None, domestic=False):
+    if destinations_db is None:
+        destinations_db = POPULAR_DESTINATIONS
     try:
         raw_flights = _search_flights(origin, dest_code, departure_date, return_date, adults,
                                       children, infants_in_seat, infants_on_lap)
@@ -403,9 +544,10 @@ def _search_one_destination(origin, dest_code, departure_date, return_date, adul
 
         if prices:
             prices.sort(key=lambda x: x[0])
-            dest_info = POPULAR_DESTINATIONS.get(dest_code, {})
+            dest_info = destinations_db.get(dest_code, {})
             booking_links = _booking_links(origin, dest_code, departure_date, return_date,
-                                           adults, children, infants_in_seat, infants_on_lap)
+                                           adults, children, infants_in_seat, infants_on_lap,
+                                           domestic=domestic)
 
             cheapest_price, cheapest = prices[0]
 
@@ -447,6 +589,19 @@ def _search_one_destination(origin, dest_code, departure_date, return_date, adul
 
 @app.post("/api/flights/cheapest-destinations")
 async def cheapest_destinations(req: CheapestDestinationsRequest):
+    if req.mode == "domestic":
+        destinations_db = DOMESTIC_DESTINATIONS
+        domestic = True
+    elif req.mode == "all":
+        destinations_db = {**POPULAR_DESTINATIONS, **DOMESTIC_DESTINATIONS}
+        domestic = False
+    else:
+        destinations_db = POPULAR_DESTINATIONS
+        domestic = False
+
+    # 국내선은 출발지에서 자기 자신 제외
+    dest_codes = [c for c in destinations_db if c != req.origin]
+
     loop = asyncio.get_event_loop()
     tasks = [
         loop.run_in_executor(
@@ -454,14 +609,15 @@ async def cheapest_destinations(req: CheapestDestinationsRequest):
             _search_one_destination,
             req.origin, dest_code, req.departure_date, req.return_date, req.adults,
             req.children, req.infants_in_seat, req.infants_on_lap,
+            destinations_db, domestic,
         )
-        for dest_code in POPULAR_DESTINATIONS
+        for dest_code in dest_codes
     ]
     results = await asyncio.gather(*tasks)
     destinations = [r for r in results if r is not None]
     destinations.sort(key=lambda d: int(d["price"]["total"]))
 
-    return {"count": len(destinations), "destinations": destinations}
+    return {"count": len(destinations), "destinations": destinations, "mode": req.mode}
 
 
 # ── Hotels (외부 링크) ──
@@ -558,6 +714,89 @@ def search_activities(req: ActivitySearchRequest):
     ]
 
     return {"count": len(activities), "activities": activities}
+
+
+# ── Domestic Regions ──
+
+@app.get("/api/domestic/regions")
+def get_domestic_regions():
+    return DOMESTIC_REGIONS
+
+
+@app.post("/api/domestic/search")
+def search_domestic(req: DomesticSearchRequest):
+    region = DOMESTIC_REGIONS.get(req.region)
+    if not region:
+        raise HTTPException(status_code=400, detail="지원하지 않는 지역입니다")
+
+    kw = quote(region["keyword"])
+    ci, co, adults = req.check_in, req.check_out, req.adults
+
+    links = [
+        {
+            "site": "야놀자",
+            "category": "숙소",
+            "description": f"{region['name']} 숙소 최저가 비교",
+            "url": f"https://www.yanolja.com/search?keyword={kw}&checkIn={ci}&checkOut={co}&adultCount={adults}",
+        },
+        {
+            "site": "여기어때",
+            "category": "숙소",
+            "description": f"{region['name']} 호텔·펜션·모텔 특가",
+            "url": f"https://www.goodchoice.kr/product/search?keyword={kw}&startdate={ci}&enddate={co}",
+        },
+        {
+            "site": "네이버 호텔",
+            "category": "숙소",
+            "description": f"{region['name']} 호텔 가격 비교",
+            "url": f"https://hotel.naver.com/hotels/search?destination={kw}&checkin={ci}&checkout={co}&adult={adults}",
+        },
+        {
+            "site": "마이리얼트립",
+            "category": "액티비티·체험",
+            "description": f"{region['name']} 현지 체험, 투어, 티켓",
+            "url": f"https://www.myrealtrip.com/offers?q={kw}",
+        },
+        {
+            "site": "클룩",
+            "category": "액티비티·체험",
+            "description": f"{region['name']} 투어·액티비티 예약",
+            "url": f"https://www.klook.com/ko/search/?query={kw}",
+        },
+        {
+            "site": "아고다",
+            "category": "숙소",
+            "description": f"{region['name']} 호텔·리조트 특가 (아고다)",
+            "url": f"https://www.agoda.com/ko-kr/search?city={kw}&checkIn={ci}&checkOut={co}&adults={adults}",
+        },
+        {
+            "site": "인터파크 투어",
+            "category": "패키지",
+            "description": f"{region['name']} 국내 여행 패키지",
+            "url": f"https://tour.interpark.com/search?keyword={kw}",
+        },
+        {
+            "site": "땡처리닷컴",
+            "category": "패키지·특가",
+            "description": f"{region['name']} 땡처리 여행 상품 특가",
+            "url": f"https://www.ttour.com/search?keyword={kw}",
+        },
+        {
+            "site": "트립닷컴",
+            "category": "숙소·패키지",
+            "description": f"{region['name']} 호텔·리조트 (Trip.com)",
+            "url": f"https://kr.trip.com/hotels/list?city={kw}&checkIn={ci}&checkOut={co}&adult={adults}",
+        },
+    ]
+
+    return {"region": region["name"], "links": links}
+
+
+# ── Airline Deals ──
+
+@app.get("/api/airline-deals")
+def get_airline_deals():
+    return {"airlines": AIRLINE_DEALS}
 
 
 if __name__ == "__main__":

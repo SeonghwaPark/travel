@@ -11,7 +11,7 @@ function stopsText(stops) {
   return stops || ''
 }
 
-function CheapestResults({ destinations }) {
+function CheapestResults({ destinations, mode }) {
   const [expanded, setExpanded] = useState({})
 
   if (destinations.length === 0) {
@@ -25,7 +25,7 @@ function CheapestResults({ destinations }) {
   return (
     <div>
       <h2 className="results-header">
-        최저가 목적지 순위 ({destinations.length}개 도시)
+        {mode === 'domestic' ? '국내' : '해외'} 최저가 목적지 순위 ({destinations.length}개 도시)
       </h2>
       <div className="price-source-notice">
         Google Flights 왕복 기준 가격입니다. 실제 예약 시 가격이 다를 수 있으니 각 사이트에서 확인하세요.
@@ -85,12 +85,21 @@ function CheapestResults({ destinations }) {
                   <a className="booking-link" href={dest.booking_links.google_flights} target="_blank" rel="noopener noreferrer">
                     Google Flights에서 확인
                   </a>
-                  <a className="booking-link" href={dest.booking_links.kayak} target="_blank" rel="noopener noreferrer">
-                    Kayak에서 확인
-                  </a>
-                  <a className="booking-link" href={dest.booking_links.trip_com} target="_blank" rel="noopener noreferrer">
-                    Trip.com에서 확인
-                  </a>
+                  {dest.booking_links.naver_flights && (
+                    <a className="booking-link" href={dest.booking_links.naver_flights} target="_blank" rel="noopener noreferrer">
+                      네이버 항공에서 확인
+                    </a>
+                  )}
+                  {dest.booking_links.kayak && (
+                    <a className="booking-link" href={dest.booking_links.kayak} target="_blank" rel="noopener noreferrer">
+                      Kayak에서 확인
+                    </a>
+                  )}
+                  {dest.booking_links.trip_com && (
+                    <a className="booking-link" href={dest.booking_links.trip_com} target="_blank" rel="noopener noreferrer">
+                      Trip.com에서 확인
+                    </a>
+                  )}
                 </div>
               )}
             </div>
