@@ -6,6 +6,7 @@ if sys.stderr and hasattr(sys.stderr, 'buffer'):
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from fast_flights import FlightData, Passengers, TFSData
 from selectolax.lexbor import LexborHTMLParser
@@ -14,8 +15,17 @@ import asyncio
 import re
 import threading
 import time as _time
+import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
+from dotenv import load_dotenv
+from openai import OpenAI
+from groq import Groq
+
+load_dotenv()
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if os.getenv("OPENAI_API_KEY") else None
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY")) if os.getenv("GROQ_API_KEY") else None
 
 # Google 요청 간 최소 간격 (rate limiting 방지)
 _fetch_lock = threading.Lock()
@@ -797,6 +807,123 @@ def search_domestic(req: DomesticSearchRequest):
 @app.get("/api/airline-deals")
 def get_airline_deals():
     return {"airlines": AIRLINE_DEALS}
+
+
+# ── Trip Planner (AI) ──
+
+class TripPlanRequest(BaseModel):
+    destination: str
+    start_date: str
+    end_date: str
+    travelers: str = "성인 2명"
+    preferences: str = ""
+
+
+@app.post("/api/trip/generate")
+async def generate_trip_plan(req: TripPlanRequest):
+    prompt = f"""당신은 한국 여행 전문가입니다. 다음 조건에 맞는 상세한 여행 일정을 만들어주세요.
+
+여행지: {req.destination}
+기간: {req.start_date} ~ {req.end_date}
+인원: {req.travelers}
+{f'선호사항: {req.preferences}' if req.preferences else ''}
+
+반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요:
+{{
+  "title": "여행 제목",
+  "summary": "여행 한줄 요약",
+  "days": [
+    {{
+      "date": "YYYY-MM-DD",
+      "label": "DAY 1",
+      "theme": "이 날의 테마 (예: 도착 & 해안 드라이브)",
+      "items": [
+        {{
+          "time": "09:00",
+          "title": "장소/활동명",
+          "category": "관광지|맛집|카페|숙소|이동|체험",
+          "description": "상세 설명 (왜 추천하는지, 팁 등)",
+          "duration": "약 1시간",
+          "cost": "입장료 무료" 또는 "1인 15,000원" 등,
+          "address": "대략적 주소나 위치"
+        }}
+      ],
+      "accommodation": {{
+        "name": "추천 숙소명",
+        "type": "호텔|펜션|리조트|게스트하우스",
+        "reason": "추천 이유",
+        "price_range": "1박 10~15만원"
+      }},
+      "tip": "이 날의 여행 팁"
+    }}
+  ],
+  "budget_summary": {{
+    "accommodation": "총 숙박비 예상",
+    "food": "총 식비 예상",
+    "activities": "총 관광/체험비 예상",
+    "transport": "총 교통비 예상",
+    "total": "총 예상 비용"
+  }},
+  "packing_tips": ["준비물1", "준비물2"],
+  "warnings": ["주의사항1"]
+}}
+
+각 날짜별로 아침~저녁까지 시간대별로 빈틈없이 일정을 짜주세요.
+동선을 고려해서 효율적으로 배치하고, 맛집은 구체적인 메뉴 추천도 포함하세요.
+숙소는 매일 추천해주되, 같은 숙소에 연박하는 것도 괜찮습니다."""
+
+    system_msg = "You are a Korean travel expert. Always respond with valid JSON only. No markdown, no extra text. Use only Korean characters (한글), never use Chinese characters (한자). All text must be in pure Korean."
+    messages = [
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": prompt},
+    ]
+
+    # OpenAI 우선 시도, 실패 시 Groq fallback
+    providers = []
+    if openai_client:
+        providers.append(("openai", openai_client, "gpt-4o-mini", 6000))
+    if groq_client:
+        providers.append(("groq", groq_client, "llama-3.3-70b-versatile", 6000))
+
+    if not providers:
+        raise HTTPException(status_code=500, detail="AI API 키가 설정되지 않았습니다. .env 파일을 확인하세요.")
+
+    loop = asyncio.get_event_loop()
+    last_error = None
+
+    for provider_name, client, model, max_tokens in providers:
+        try:
+            for attempt in range(2):
+                response = await loop.run_in_executor(
+                    None,
+                    lambda c=client, m=model, mt=max_tokens: c.chat.completions.create(
+                        model=m,
+                        messages=messages,
+                        temperature=0.5,
+                        max_tokens=mt,
+                    ),
+                )
+                content = response.choices[0].message.content.strip()
+
+                if content.startswith("```"):
+                    content = re.sub(r"^```(?:json)?\s*", "", content)
+                    content = re.sub(r"\s*```$", "", content)
+
+                try:
+                    plan = json.loads(content)
+                    plan["_provider"] = provider_name
+                    return plan
+                except json.JSONDecodeError:
+                    if attempt == 0:
+                        continue
+                    last_error = f"{provider_name}: JSON 파싱 실패"
+                    break
+        except Exception as e:
+            last_error = f"{provider_name}: {str(e)}"
+            print(f"[Trip AI] {provider_name} 실패: {e}")
+            continue
+
+    raise HTTPException(status_code=500, detail=f"AI 일정 생성 실패: {last_error}")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,7 @@
 fastapi
 uvicorn
 fast-flights
+openai
+google-genai
+groq
+python-dotenv
