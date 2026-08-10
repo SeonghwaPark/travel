@@ -17,6 +17,7 @@ const HORIZONS = [
 
 function BestDatesForm({ airports, onSearch, loading }) {
   const [mode, setMode] = useState('anytime') // 'anytime' | 'range'
+  const [health, setHealth] = useState(null)   // null | 'checking' | {ok, ...}
   const [origin, setOrigin] = useState('ICN')
   const [destination, setDestination] = useState('KIX')
   const [horizon, setHorizon] = useState(60)
@@ -70,12 +71,36 @@ function BestDatesForm({ airports, onSearch, loading }) {
 
   const canSubmit = mode === 'anytime' || (earliest && latest)
 
+  const checkHealth = async () => {
+    setHealth('checking')
+    try {
+      const res = await fetch('http://localhost:8000/api/flights/price-graph/health')
+      setHealth(await res.json())
+    } catch {
+      setHealth({ ok: false, hint: '백엔드(localhost:8000)에 연결할 수 없습니다. start-backend.bat이 실행 중인지 확인하세요.' })
+    }
+  }
+
   return (
     <form className="search-form" onSubmit={handleSubmit}>
       <p className="form-hint">
         여행지만 정하면 됩니다. 시기가 미정이면 전체 기간에서 날짜를 골고루 뽑아 왕복 최저가를 비교하고,
         가장 싼 날짜부터 순서대로 보여드립니다.
+        {' '}
+        <button type="button" className="health-check-btn" onClick={checkHealth} disabled={health === 'checking'}>
+          {health === 'checking' ? '확인 중...' : '가격 그래프 연결 테스트'}
+        </button>
       </p>
+      {health && health !== 'checking' && (
+        <div className={`health-result ${health.ok ? 'health-ok' : 'health-fail'}`}>
+          {health.ok
+            ? `✓ 정상: ${health.tested_route} ${health.tested_range} 기준 ${health.offers_found}개 날짜 가격 확인`
+            : `✗ ${health.hint}`}
+          {!health.ok && health.logs && health.logs.length > 0 && (
+            <pre className="health-logs">{health.logs.slice(-10).join('\n')}</pre>
+          )}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         {[

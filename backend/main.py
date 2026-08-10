@@ -653,6 +653,21 @@ _MAX_RANGE_DAYS = 161  # Google 가격 그래프가 지원하는 최대 기간
 _TOP_DETAIL = 5       # 상세 항공편(항공사·시간)을 조회할 상위 조합 수
 
 
+from collections import deque
+from datetime import datetime as _dt
+
+_pg_log = deque(maxlen=50)  # 가격 그래프 최근 로그 (진단용)
+
+
+def _pg_print(msg):
+    line = f"{_dt.now().strftime('%H:%M:%S')} {msg}"
+    _pg_log.append(line)
+    try:
+        print(line)
+    except Exception:
+        pass
+
+
 def _price_graph_leg(src, dst, date):
     return [[[[src, 0]]], [[[dst, 0]]], None, 0, [], [], date, None, [], [], [], None, None, [], 3]
 
@@ -717,17 +732,17 @@ def _fetch_price_graph(origin, destination, range_start, range_end, nights,
             client.get("https://www.google.com/")  # 쿠키 확보
             res = client.post(url, content=body.encode(), headers=headers)
             if res.status_code != 200:
-                print(f"[PriceGraph HTTP {res.status_code}] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
+                _pg_print(f"[PriceGraph HTTP {res.status_code}] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
                 _time.sleep(2)
                 continue
 
             offers = _parse_price_graph(res.text)
             if offers:
-                print(f"[PriceGraph OK] {origin}->{destination} {nights}박 | {len(offers)}개 날짜")
+                _pg_print(f"[PriceGraph OK] {origin}->{destination} {nights}박 | {len(offers)}개 날짜")
                 return offers
-            print(f"[PriceGraph EMPTY] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
+            _pg_print(f"[PriceGraph EMPTY] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
         except Exception as e:
-            print(f"[PriceGraph FAIL] {origin}->{destination} {nights}박 시도 {attempt+1}/3: {e}")
+            _pg_print(f"[PriceGraph FAIL] {origin}->{destination} {nights}박 시도 {attempt+1}/3: {e}")
         _time.sleep(2)
     return []
 
@@ -936,6 +951,31 @@ async def best_dates(req: BestDatesRequest):
         "cheapest": by_price[0] if by_price else None,
         "average_price": int(sum(prices) / len(prices)) if prices else None,
         "results": by_price[:40],
+    }
+
+
+@app.get("/api/flights/price-graph/health")
+async def price_graph_health():
+    """가격 그래프 연결 자가 진단: ICN→KIX 30일 범위를 한 번 조회해본다."""
+    from datetime import datetime, timedelta
+
+    start = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+    end = (datetime.now() + timedelta(days=37)).strftime("%Y-%m-%d")
+
+    loop = asyncio.get_event_loop()
+    offers = await loop.run_in_executor(
+        executor, _fetch_price_graph, "ICN", "KIX", start, end, 3)
+
+    return {
+        "ok": len(offers) > 0,
+        "tested_route": "ICN → KIX",
+        "tested_range": f"{start} ~ {end} (3박)",
+        "offers_found": len(offers),
+        "sample": offers[:3],
+        "logs": list(_pg_log),
+        "hint": ("정상 동작 중입니다." if offers else
+                 "가격 그래프 조회에 실패했습니다. logs 내용을 복사해서 알려주시면 원인을 잡을 수 있습니다. "
+                 "실패해도 '최저가 날짜' 검색은 날짜별 스캔 방식으로 자동 전환되어 동작합니다."),
     }
 
 

@@ -68,6 +68,23 @@ start-frontend.bat      # Vite :5173
 
 > 데스크톱 단축키를 만들려면: `create_shortcut.ps1` 실행
 
+### 최신 브랜치 받아서 실행하기
+
+```bash
+git fetch origin claude/travel-flight-price-search-xdkpdi
+git checkout claude/travel-flight-price-search-xdkpdi
+cd backend && pip install -r requirements.txt && cd ..
+start.bat
+```
+
+### "최저가 날짜" 기능 확인
+
+1. 브라우저에서 `http://localhost:5173` → **최저가 날짜** 탭
+2. 상단의 **가격 그래프 연결 테스트** 버튼 클릭
+   - ✓ 정상: 그대로 검색하면 됩니다 (여행지·기간만 고르고 "가장 싼 시기 찾기")
+   - ✗ 실패: 화면에 표시되는 로그를 복사해서 알려주세요. 실패해도 검색은 날짜별 스캔 방식으로 자동 전환되어 동작합니다.
+3. 직접 확인하려면 `http://localhost:8000/api/flights/price-graph/health` 를 열어도 됩니다.
+
 ---
 
 ## 📁 구조
