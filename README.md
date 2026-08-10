@@ -85,6 +85,25 @@ start.bat
    - ✗ 실패: 화면에 표시되는 로그를 복사해서 알려주세요. 실패해도 검색은 날짜별 스캔 방식으로 자동 전환되어 동작합니다.
 3. 직접 확인하려면 `http://localhost:8000/api/flights/price-graph/health` 를 열어도 됩니다.
 
+### 문제 해결
+
+**백엔드가 아예 실행되지 않고 `ImportError: cannot import name 'FlightData'` 가 뜬다면**
+
+`fast-flights` 3.x가 설치된 경우입니다. 3.x는 이 프로젝트가 쓰는 2.x API(`FlightData`,
+`TFSData`)를 제거해서 import 단계에서 실패합니다. `requirements.txt`에 `fast-flights<3`으로
+고정해두었으니 아래를 실행하세요.
+
+```bash
+cd backend
+pip install -r requirements.txt   # fast-flights 2.x로 다시 설치됨
+```
+
+**`[PriceGraph FAIL] ... tunnel error` 또는 연결 실패가 계속된다면**
+
+방화벽·프록시가 `www.google.com` 접속을 막고 있는 경우입니다. 회사망이나 VPN을 쓰고 있다면
+해제 후 다시 시도하세요. 연결이 안 되어도 검색 결과 화면에서 Google Flights로 바로 가는
+링크는 제공됩니다.
+
 ---
 
 ## 📁 구조
