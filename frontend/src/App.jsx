@@ -115,7 +115,7 @@ function App() {
           <>
             <BestDatesForm airports={airports} onSearch={bestDates.search} loading={bestDates.loading} />
             {bestDates.error && <div className="error-msg">{bestDates.error}</div>}
-            {bestDates.loading && <div className="loading">출발일별 왕복 최저가를 비교하고 있습니다... (1~2분 소요될 수 있어요)</div>}
+            {bestDates.loading && <div className="loading">전체 기간의 날짜별 왕복 최저가를 조회하고 있습니다...</div>}
             {!bestDates.loading && bestDates.searched && (
               <BestDatesResults data={bestDates.data} />
             )}

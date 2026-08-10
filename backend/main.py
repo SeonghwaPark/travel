@@ -73,6 +73,8 @@ class BestDatesRequest(BaseModel):
     earliest_departure: str
     latest_departure: str
     nights: int = 3
+    min_nights: int | None = None  # 지정 시 nights 대신 min~max 조합 스캔
+    max_nights: int | None = None
     adults: int = 1
     children: int = 0
     infants_in_seat: int = 0
@@ -214,7 +216,7 @@ DOMESTIC_DESTINATIONS = {
 
 POPULAR_DESTINATIONS = {
     "NRT": {"name": "도쿄 나리타", "country": "일본"},
-    "KIX": {"name": "오사카 간사이", "country": "일본"},
+    "KIX": {"name": "오사카·교토 (간사이)", "country": "일본"},
     "FUK": {"name": "후쿠오카", "country": "일본"},
     "BKK": {"name": "방콕", "country": "태국"},
     "SIN": {"name": "싱가포르", "country": "싱가포르"},
@@ -645,7 +647,124 @@ async def cheapest_destinations(req: CheapestDestinationsRequest):
 
 # ── Best Dates (여행지 최저가 날짜 스캔) ──
 
-_MAX_DATE_SCAN = 14  # 한 번에 스캔하는 최대 출발일 수
+_MAX_DATE_SCAN = 14   # 폴백 스캔 시 최대 출발일 수
+_MAX_COMBOS = 28      # 폴백 스캔 시 출발일 × 여행기간 조합 상한
+_MAX_RANGE_DAYS = 161  # Google 가격 그래프가 지원하는 최대 기간
+_TOP_DETAIL = 5       # 상세 항공편(항공사·시간)을 조회할 상위 조합 수
+
+
+def _price_graph_leg(src, dst, date):
+    return [[[[src, 0]]], [[[dst, 0]]], None, 0, [], [], date, None, [], [], [], None, None, [], 3]
+
+
+def _fetch_price_graph(origin, destination, range_start, range_end, nights,
+                       adults=1, children=0, infants_in_seat=0, infants_on_lap=0):
+    """Google Flights '가격 그래프' 내부 API 호출.
+
+    요청 한 번으로 range_start~range_end 사이 모든 출발일의 왕복 최저가를 받아온다.
+    (날짜마다 검색 페이지를 긁는 방식보다 수십 배 빠름)
+    """
+    from datetime import datetime, timedelta
+
+    dep = datetime.strptime(range_start, "%Y-%m-%d")
+    ret = dep + timedelta(days=nights)
+
+    # 내부 요청 구조: [null, 검색조건, [기간 시작, 기간 끝], null, [여행일수, 여행일수]]
+    inner = [
+        None,
+        [None, None, 1, None, [], 1,
+         [adults, children, infants_on_lap, infants_in_seat],
+         None, None, None, None, None, None,
+         [
+             _price_graph_leg(origin, destination, dep.strftime("%Y-%m-%d")),
+             _price_graph_leg(destination, origin, ret.strftime("%Y-%m-%d")),
+         ],
+         None, None, None, 1, None, None, None, None, None, []],
+        [range_start, range_end],
+        None,
+        [nights, nights],
+    ]
+    freq = json.dumps([None, json.dumps(inner, separators=(",", ":"))],
+                      separators=(",", ":"))
+    body = ("f.req=" + quote(freq, safe="")
+            + "&at=AAuQa1oq5qIkgkQ2nG9vQZFTgSME%3A" + str(int(_time.time())) + "&")
+
+    url = ("https://www.google.com/_/FlightsFrontendUi/data/"
+           "travel.frontend.flights.FlightsFrontendService/GetCalendarGraph"
+           "?f.sid=-8920707734915550076&bl=boq_travel-frontend-ui_20230627.07_p1"
+           "&hl=en&soc-app=162&soc-platform=1&soc-device=1&_reqid=261464&rt=c")
+
+    headers = {
+        "accept": "*/*",
+        "accept-language": "en-US,en;q=0.9",
+        "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "x-goog-ext-259736195-jspb":
+            '["en-US","US","KRW",1,null,[-120],null,[[48764689,47907128,48676280,'
+            '48710756,48627726,48480739,48593234,48707380]],1,[]]',
+    }
+
+    for attempt in range(3):
+        try:
+            global _last_fetch_time
+            with _fetch_lock:
+                now = _time.time()
+                wait = _FETCH_INTERVAL - (now - _last_fetch_time)
+                if wait > 0:
+                    _time.sleep(wait)
+                _last_fetch_time = _time.time()
+
+            client = primp.Client(impersonate="chrome_131", verify=False, cookie_store=True)
+            client.get("https://www.google.com/")  # 쿠키 확보
+            res = client.post(url, content=body.encode(), headers=headers)
+            if res.status_code != 200:
+                print(f"[PriceGraph HTTP {res.status_code}] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
+                _time.sleep(2)
+                continue
+
+            offers = _parse_price_graph(res.text)
+            if offers:
+                print(f"[PriceGraph OK] {origin}->{destination} {nights}박 | {len(offers)}개 날짜")
+                return offers
+            print(f"[PriceGraph EMPTY] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
+        except Exception as e:
+            print(f"[PriceGraph FAIL] {origin}->{destination} {nights}박 시도 {attempt+1}/3: {e}")
+        _time.sleep(2)
+    return []
+
+
+def _parse_price_graph(text):
+    """batchexecute 응답에서 (출발일, 귀국일, 가격) 목록 추출"""
+    offers = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("[["):
+            continue
+        try:
+            chunk = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        for part in chunk:
+            if not (isinstance(part, list) and len(part) >= 3 and isinstance(part[2], str)):
+                continue
+            try:
+                inner = json.loads(part[2])
+            except json.JSONDecodeError:
+                continue
+            if not (isinstance(inner, list) and len(inner) >= 2 and isinstance(inner[1], list)):
+                continue
+            for o in inner[1]:
+                try:
+                    dep_date, ret_date = o[0], o[1]
+                    price = o[2][0][1]
+                    if dep_date and ret_date and price:
+                        offers.append({
+                            "departure_date": dep_date,
+                            "return_date": ret_date,
+                            "price": int(price),
+                        })
+                except (TypeError, IndexError, ValueError):
+                    continue
+    return offers
 
 
 def _search_one_date(origin, destination, departure_date, return_date, adults,
@@ -692,50 +811,131 @@ async def best_dates(req: BestDatesRequest):
         raise HTTPException(status_code=400, detail="날짜 형식이 잘못되었습니다 (YYYY-MM-DD)")
     if latest < earliest:
         raise HTTPException(status_code=400, detail="마지막 출발일이 첫 출발일보다 빠릅니다")
-    if req.nights < 1 or req.nights > 30:
-        raise HTTPException(status_code=400, detail="여행 기간은 1~30박이어야 합니다")
+
+    min_n = req.min_nights if req.min_nights is not None else req.nights
+    max_n = req.max_nights if req.max_nights is not None else req.nights
+    if min_n < 1 or max_n > 30 or min_n > max_n:
+        raise HTTPException(status_code=400, detail="여행 기간은 1~30박, 최소가 최대보다 클 수 없습니다")
+    if max_n - min_n + 1 > 4:
+        raise HTTPException(status_code=400, detail="여행 기간 범위는 최대 4개(예: 2~5박)까지 가능합니다")
+    nights_options = list(range(min_n, max_n + 1))
 
     window_days = (latest - earliest).days + 1
-    scan_days = min(window_days, _MAX_DATE_SCAN)
+    if window_days > _MAX_RANGE_DAYS:
+        latest = earliest + timedelta(days=_MAX_RANGE_DAYS - 1)
+        window_days = _MAX_RANGE_DAYS
 
     dest_code = req.destination.upper()
-    domestic = dest_code in DOMESTIC_DESTINATIONS and req.origin.upper() in KOREAN_AIRPORTS
+    origin_code = req.origin.upper()
+    domestic = dest_code in DOMESTIC_DESTINATIONS and origin_code in KOREAN_AIRPORTS
     dest_info = {**POPULAR_DESTINATIONS, **DOMESTIC_DESTINATIONS}.get(dest_code, {})
-
-    date_pairs = []
-    for i in range(scan_days):
-        dep = earliest + timedelta(days=i)
-        ret = dep + timedelta(days=req.nights)
-        date_pairs.append((dep.strftime("%Y-%m-%d"), ret.strftime("%Y-%m-%d")))
+    earliest_s = earliest.strftime("%Y-%m-%d")
+    latest_s = latest.strftime("%Y-%m-%d")
 
     loop = asyncio.get_event_loop()
-    tasks = [
+
+    # 1) 가격 그래프: 여행기간(박수)당 요청 1번으로 전체 날짜의 최저가 확보
+    pg_tasks = [
         loop.run_in_executor(
             executor,
-            _search_one_date,
-            req.origin, dest_code, dep, ret, req.adults,
-            req.children, req.infants_in_seat, req.infants_on_lap, domestic,
+            _fetch_price_graph,
+            origin_code, dest_code, earliest_s, latest_s, n,
+            req.adults, req.children, req.infants_in_seat, req.infants_on_lap,
         )
-        for dep, ret in date_pairs
+        for n in nights_options
     ]
-    results = await asyncio.gather(*tasks)
-    found = [r for r in results if r is not None]
+    pg_results = await asyncio.gather(*pg_tasks)
+
+    found = []
+    for n, offers in zip(nights_options, pg_results):
+        for o in offers:
+            found.append({
+                "departure_date": o["departure_date"],
+                "return_date": o["return_date"],
+                "nights": n,
+                "price": {"total": str(o["price"]), "currency": "KRW"},
+                "airline": "",
+                "duration": "",
+                "departure": "",
+                "arrival": "",
+                "stops": None,
+                "booking_links": _booking_links(
+                    origin_code, dest_code, o["departure_date"], o["return_date"],
+                    req.adults, req.children, req.infants_in_seat, req.infants_on_lap,
+                    domestic=domestic),
+            })
+    method = "price_graph"
+    sampled = False
+    scanned_dates = window_days
+
+    # 2) 폴백: 가격 그래프 실패 시 기존 날짜별 스캔 (범위 넓으면 균등 샘플링)
+    if not found:
+        method = "scan"
+        max_dates = max(1, min(_MAX_DATE_SCAN, _MAX_COMBOS // len(nights_options)))
+        if window_days <= max_dates:
+            day_offsets = list(range(window_days))
+        else:
+            step = (window_days - 1) / (max_dates - 1) if max_dates > 1 else 0
+            day_offsets = sorted({round(i * step) for i in range(max_dates)})
+            sampled = True
+        scanned_dates = len(day_offsets)
+
+        date_pairs = []
+        for off in day_offsets:
+            dep = earliest + timedelta(days=off)
+            for n in nights_options:
+                ret = dep + timedelta(days=n)
+                date_pairs.append((dep.strftime("%Y-%m-%d"), ret.strftime("%Y-%m-%d"), n))
+
+        tasks = [
+            loop.run_in_executor(
+                executor,
+                _search_one_date,
+                origin_code, dest_code, dep, ret, req.adults,
+                req.children, req.infants_in_seat, req.infants_on_lap, domestic,
+            )
+            for dep, ret, _n in date_pairs
+        ]
+        results = await asyncio.gather(*tasks)
+        for r, (_dep, _ret, n) in zip(results, date_pairs):
+            if r is not None:
+                r["nights"] = n
+                found.append(r)
 
     by_price = sorted(found, key=lambda r: int(r["price"]["total"]))
     prices = [int(r["price"]["total"]) for r in found]
 
+    # 3) 상위 조합만 상세 항공편(항공사·시간) 보강
+    if method == "price_graph" and by_price:
+        top = by_price[:_TOP_DETAIL]
+        detail_tasks = [
+            loop.run_in_executor(
+                executor,
+                _search_one_date,
+                origin_code, dest_code, r["departure_date"], r["return_date"], req.adults,
+                req.children, req.infants_in_seat, req.infants_on_lap, domestic,
+            )
+            for r in top
+        ]
+        details = await asyncio.gather(*detail_tasks)
+        for r, d in zip(top, details):
+            if d is not None:
+                r.update({k: d[k] for k in ("airline", "duration", "departure", "arrival", "stops")})
+
     return {
-        "origin": req.origin.upper(),
+        "origin": origin_code,
         "destination_code": dest_code,
         "destination_name": dest_info.get("name", dest_code),
         "country": dest_info.get("country", ""),
-        "nights": req.nights,
-        "scanned_dates": len(date_pairs),
-        "truncated": window_days > scan_days,
-        "count": len(found),
+        "min_nights": min_n,
+        "max_nights": max_n,
+        "method": method,
+        "scanned_dates": scanned_dates,
+        "sampled": sampled,
+        "count": len(by_price),
         "cheapest": by_price[0] if by_price else None,
         "average_price": int(sum(prices) / len(prices)) if prices else None,
-        "results": by_price,
+        "results": by_price[:40],
     }
 
 

@@ -23,22 +23,26 @@ function BestDatesResults({ data }) {
   const results = data.results
   const maxPrice = Math.max(...results.map(r => Number(r.price.total)))
   const minPrice = Number(results[0].price.total)
+  const nightsLabel = data.min_nights === data.max_nights
+    ? `${data.min_nights}박`
+    : `${data.min_nights}~${data.max_nights}박`
 
   return (
     <div>
       <h2 className="results-header">
-        {data.destination_name} {data.nights}박 {data.nights + 1}일 · 출발일별 최저가 ({data.count}개 날짜)
+        {data.destination_name} {nightsLabel} · 가장 싼 시기 순위 ({data.count}개 조합)
       </h2>
       <div className="price-source-notice">
         Google Flights 왕복 기준 가격입니다. 실제 예약 시 가격이 다를 수 있으니 각 사이트에서 확인하세요.
-        {data.truncated && ' 날짜 범위가 길어 앞쪽 14일만 조회했습니다.'}
+        {data.method === 'price_graph' && ` 가격 그래프로 ${data.scanned_dates}일 전체를 조회해 가장 싼 상위 ${results.length}개 조합을 보여드립니다 (상위 ${Math.min(5, results.length)}개는 항공사·시간 포함).`}
+        {data.sampled && ` 기간이 길어 전체 범위에서 ${data.scanned_dates}개 출발일을 골고루 뽑아 비교했습니다. 마음에 드는 시기를 찾으면 '날짜 범위 지정'으로 그 주변을 정밀 검색해보세요.`}
       </div>
 
       {data.cheapest && (
         <div className="best-date-banner">
-          <div className="best-date-label">가장 저렴한 출발일</div>
+          <div className="best-date-label">가장 저렴한 시기</div>
           <div className="best-date-main">
-            {formatDate(data.cheapest.departure_date)} 출발 → {formatDate(data.cheapest.return_date)} 귀국
+            {formatDate(data.cheapest.departure_date)} 출발 → {formatDate(data.cheapest.return_date)} 귀국 ({data.cheapest.nights}박 {data.cheapest.nights + 1}일)
           </div>
           <div className="best-date-price">₩{formatPrice(data.cheapest.price.total)}</div>
           {data.average_price && minPrice < data.average_price && (
@@ -51,7 +55,7 @@ function BestDatesResults({ data }) {
 
       <div className="dest-list">
         {results.map((r, idx) => (
-          <div key={r.departure_date} className="dest-card">
+          <div key={`${r.departure_date}-${r.nights}`} className="dest-card">
             <div className="dest-rank">
               <span className={`rank-number rank-${idx < 3 ? idx + 1 : 'other'}`}>
                 {idx + 1}
@@ -61,12 +65,15 @@ function BestDatesResults({ data }) {
               <div className="dest-name">
                 {formatDate(r.departure_date)} 출발
                 <span className="dest-country">{formatDate(r.return_date)} 귀국</span>
+                <span className="dest-code">{r.nights}박 {r.nights + 1}일</span>
               </div>
               <div className="dest-detail">
-                {r.airline ? <span>{r.airline}</span> : <span style={{color:'#999'}}>항공사 정보 없음</span>}
+                {r.airline
+                  ? <span>{r.airline}</span>
+                  : <span style={{color:'#999'}}>항공편 상세는 예약 링크에서 확인</span>}
                 {r.duration && <span>{r.duration}</span>}
                 {r.departure && r.arrival && <span>{r.departure} → {r.arrival}</span>}
-                <span>{stopsText(r.stops)}</span>
+                {stopsText(r.stops) && <span>{stopsText(r.stops)}</span>}
               </div>
               <div className="price-bar-track">
                 <div
