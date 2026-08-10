@@ -32,6 +32,43 @@ _fetch_lock = threading.Lock()
 _last_fetch_time = 0.0
 _FETCH_INTERVAL = 1.5  # 최소 1.5초 간격
 
+
+_IMPERSONATE_CANDIDATES = (
+    "chrome_146", "chrome_142", "chrome_138", "chrome_134", "chrome_133",
+    "chrome_131", "chrome_130", "chrome_128", "firefox_140",
+)
+
+
+def _pick_impersonate():
+    """설치된 primp가 실제로 지원하는 브라우저 지문을 고른다.
+
+    지원하지 않는 값을 넘기면 primp는 예외 대신 stderr에 경고만 남기고 무작위
+    지문으로 대체한다. 무작위 지문은 Google에 차단될 확률이 높으므로, 경고가
+    나오는지 직접 확인해서 지원되는 값만 쓴다. (지원 목록은 primp 버전마다 다름)
+    """
+    import tempfile
+
+    for name in _IMPERSONATE_CANDIDATES:
+        try:
+            with tempfile.TemporaryFile() as buf:
+                saved = os.dup(2)
+                try:
+                    os.dup2(buf.fileno(), 2)
+                    primp.Client(impersonate=name)
+                finally:
+                    os.dup2(saved, 2)
+                    os.close(saved)
+                buf.seek(0)
+                if b"does not exist" not in buf.read():
+                    return name
+        except Exception:
+            continue
+    return _IMPERSONATE_CANDIDATES[0]
+
+
+_IMPERSONATE = _pick_impersonate()
+print(f"[primp] impersonate = {_IMPERSONATE}")
+
 app = FastAPI()
 
 app.add_middleware(
@@ -402,11 +439,27 @@ def _parse_aria_label(label):
     return info
 
 
+_network_down_until = 0.0
+_NETWORK_DOWN_COOLDOWN = 30  # Google 연결 실패 후 재시도를 멈추는 시간(초)
+
+
+def _mark_network_down():
+    global _network_down_until
+    _network_down_until = _time.time() + _NETWORK_DOWN_COOLDOWN
+
+
+def _network_is_down():
+    return _time.time() < _network_down_until
+
+
 def _search_flights(origin, destination, departure_date, return_date, adults,
                      children=0, infants_in_seat=0, infants_on_lap=0):
     """Google Flights에서 항공편 검색 (aria-label 파싱, 최대 3회 재시도)"""
     from datetime import datetime, timedelta
     import time
+
+    if _network_is_down():
+        return []
 
     effective_return = return_date
     if not effective_return:
@@ -442,7 +495,7 @@ def _search_flights(origin, destination, departure_date, return_date, adults,
                     _time.sleep(wait)
                 _last_fetch_time = _time.time()
 
-            client = primp.Client(impersonate="chrome_131", verify=False)
+            client = primp.Client(impersonate=_IMPERSONATE, verify=False)
             res = client.get("https://www.google.com/travel/flights", params=params)
             if res.status_code != 200:
                 print(f"[HTTP {res.status_code}] {origin}->{destination} 시도 {attempt+1}/5")
@@ -477,6 +530,10 @@ def _search_flights(origin, destination, departure_date, return_date, adults,
                 print(f"[FAIL] {origin}->{destination} attempt {attempt+1}/5: {e}")
             except Exception:
                 pass
+            # 네트워크 자체가 막힌 경우 재시도해도 소용없으므로 빠르게 포기
+            if "tunnel" in str(e).lower() or "connect" in str(e).lower():
+                _mark_network_down()
+                return []
         time.sleep(2)
 
     return []
@@ -728,7 +785,7 @@ def _fetch_price_graph(origin, destination, range_start, range_end, nights,
                     _time.sleep(wait)
                 _last_fetch_time = _time.time()
 
-            client = primp.Client(impersonate="chrome_131", verify=False, cookie_store=True)
+            client = primp.Client(impersonate=_IMPERSONATE, verify=False, cookie_store=True)
             client.get("https://www.google.com/")  # 쿠키 확보
             res = client.post(url, content=body.encode(), headers=headers)
             if res.status_code != 200:
@@ -743,6 +800,9 @@ def _fetch_price_graph(origin, destination, range_start, range_end, nights,
             _pg_print(f"[PriceGraph EMPTY] {origin}->{destination} {nights}박 시도 {attempt+1}/3")
         except Exception as e:
             _pg_print(f"[PriceGraph FAIL] {origin}->{destination} {nights}박 시도 {attempt+1}/3: {e}")
+            if "tunnel" in str(e).lower() or "connect" in str(e).lower():
+                _mark_network_down()
+                return []
         _time.sleep(2)
     return []
 
@@ -937,6 +997,18 @@ async def best_dates(req: BestDatesRequest):
             if d is not None:
                 r.update({k: d[k] for k in ("airline", "duration", "departure", "arrival", "stops")})
 
+    message = None
+    if not by_price:
+        message = (
+            "Google 항공편 서버에 연결하지 못했습니다. 네트워크나 방화벽 설정을 확인해주세요."
+            if _network_is_down() else
+            "해당 조건의 항공편 가격을 가져오지 못했습니다. 여행 기간이나 날짜 범위를 바꿔 다시 시도해보세요."
+        )
+
+    fallback_link = google_flights_url(
+        origin_code, dest_code, earliest_s, None, req.adults,
+        req.children, req.infants_in_seat, req.infants_on_lap)
+
     return {
         "origin": origin_code,
         "destination_code": dest_code,
@@ -951,6 +1023,8 @@ async def best_dates(req: BestDatesRequest):
         "cheapest": by_price[0] if by_price else None,
         "average_price": int(sum(prices) / len(prices)) if prices else None,
         "results": by_price[:40],
+        "message": message,
+        "fallback_link": fallback_link if message else None,
     }
 
 

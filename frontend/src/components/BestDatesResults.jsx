@@ -17,7 +17,18 @@ function stopsText(stops) {
 
 function BestDatesResults({ data }) {
   if (!data || data.count === 0) {
-    return <div className="no-results">해당 기간에 항공편을 찾지 못했습니다. 날짜 범위를 바꿔서 다시 시도해보세요.</div>
+    return (
+      <div className="no-results">
+        {data?.message || '해당 기간에 항공편을 찾지 못했습니다. 날짜 범위를 바꿔서 다시 시도해보세요.'}
+        {data?.fallback_link && (
+          <div style={{ marginTop: '0.8rem' }}>
+            <a className="booking-link" href={data.fallback_link} target="_blank" rel="noopener noreferrer">
+              Google Flights에서 직접 검색하기
+            </a>
+          </div>
+        )}
+      </div>
+    )
   }
 
   const results = data.results
