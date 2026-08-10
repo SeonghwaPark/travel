@@ -67,6 +67,18 @@ class CheapestDestinationsRequest(BaseModel):
     mode: str = "international"  # "international" | "domestic" | "all"
 
 
+class BestDatesRequest(BaseModel):
+    origin: str = "ICN"
+    destination: str
+    earliest_departure: str
+    latest_departure: str
+    nights: int = 3
+    adults: int = 1
+    children: int = 0
+    infants_in_seat: int = 0
+    infants_on_lap: int = 0
+
+
 class HotelSearchRequest(BaseModel):
     destination: str
     check_in: str
@@ -475,6 +487,7 @@ def get_airports_endpoint():
     return {
         "origins": KOREAN_AIRPORTS,
         "destinations": POPULAR_DESTINATIONS,
+        "domestic_destinations": DOMESTIC_DESTINATIONS,
     }
 
 
@@ -628,6 +641,102 @@ async def cheapest_destinations(req: CheapestDestinationsRequest):
     destinations.sort(key=lambda d: int(d["price"]["total"]))
 
     return {"count": len(destinations), "destinations": destinations, "mode": req.mode}
+
+
+# ── Best Dates (여행지 최저가 날짜 스캔) ──
+
+_MAX_DATE_SCAN = 14  # 한 번에 스캔하는 최대 출발일 수
+
+
+def _search_one_date(origin, destination, departure_date, return_date, adults,
+                     children=0, infants_in_seat=0, infants_on_lap=0, domestic=False):
+    try:
+        raw_flights = _search_flights(origin, destination, departure_date, return_date,
+                                      adults, children, infants_in_seat, infants_on_lap)
+        prices = []
+        for f in raw_flights:
+            p = int(f["price"]) if f["price"] else None
+            if p is not None:
+                prices.append((p, f))
+        if not prices:
+            return None
+
+        prices.sort(key=lambda x: x[0])
+        cheapest_price, cheapest = prices[0]
+        booking_links = _booking_links(origin, destination, departure_date, return_date,
+                                       adults, children, infants_in_seat, infants_on_lap,
+                                       domestic=domestic)
+        return {
+            "departure_date": departure_date,
+            "return_date": return_date,
+            "price": {"total": str(cheapest_price), "currency": "KRW"},
+            "airline": cheapest["name"],
+            "duration": cheapest["duration"],
+            "departure": cheapest["departure"],
+            "arrival": cheapest["arrival"],
+            "stops": cheapest["stops"],
+            "booking_links": booking_links,
+        }
+    except Exception:
+        return None
+
+
+@app.post("/api/flights/best-dates")
+async def best_dates(req: BestDatesRequest):
+    from datetime import datetime, timedelta
+
+    try:
+        earliest = datetime.strptime(req.earliest_departure, "%Y-%m-%d")
+        latest = datetime.strptime(req.latest_departure, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="날짜 형식이 잘못되었습니다 (YYYY-MM-DD)")
+    if latest < earliest:
+        raise HTTPException(status_code=400, detail="마지막 출발일이 첫 출발일보다 빠릅니다")
+    if req.nights < 1 or req.nights > 30:
+        raise HTTPException(status_code=400, detail="여행 기간은 1~30박이어야 합니다")
+
+    window_days = (latest - earliest).days + 1
+    scan_days = min(window_days, _MAX_DATE_SCAN)
+
+    dest_code = req.destination.upper()
+    domestic = dest_code in DOMESTIC_DESTINATIONS and req.origin.upper() in KOREAN_AIRPORTS
+    dest_info = {**POPULAR_DESTINATIONS, **DOMESTIC_DESTINATIONS}.get(dest_code, {})
+
+    date_pairs = []
+    for i in range(scan_days):
+        dep = earliest + timedelta(days=i)
+        ret = dep + timedelta(days=req.nights)
+        date_pairs.append((dep.strftime("%Y-%m-%d"), ret.strftime("%Y-%m-%d")))
+
+    loop = asyncio.get_event_loop()
+    tasks = [
+        loop.run_in_executor(
+            executor,
+            _search_one_date,
+            req.origin, dest_code, dep, ret, req.adults,
+            req.children, req.infants_in_seat, req.infants_on_lap, domestic,
+        )
+        for dep, ret in date_pairs
+    ]
+    results = await asyncio.gather(*tasks)
+    found = [r for r in results if r is not None]
+
+    by_price = sorted(found, key=lambda r: int(r["price"]["total"]))
+    prices = [int(r["price"]["total"]) for r in found]
+
+    return {
+        "origin": req.origin.upper(),
+        "destination_code": dest_code,
+        "destination_name": dest_info.get("name", dest_code),
+        "country": dest_info.get("country", ""),
+        "nights": req.nights,
+        "scanned_dates": len(date_pairs),
+        "truncated": window_days > scan_days,
+        "count": len(found),
+        "cheapest": by_price[0] if by_price else None,
+        "average_price": int(sum(prices) / len(prices)) if prices else None,
+        "results": by_price,
+    }
 
 
 # ── Hotels (외부 링크) ──

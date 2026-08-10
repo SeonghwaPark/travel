@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-fast-flights
+fast-flights<3
 openai
 google-genai
 groq

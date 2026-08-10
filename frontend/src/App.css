@@ -708,3 +708,62 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Best Dates (최저가 날짜) ── */
+.form-hint {
+  margin: 0 0 1rem;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.best-date-banner {
+  background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%);
+  border: 1.5px solid #90cdf4;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.best-date-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2b6cb0;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3rem;
+}
+
+.best-date-main {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.best-date-price {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #2b6cb0;
+  margin-top: 0.2rem;
+}
+
+.best-date-save {
+  margin-top: 0.3rem;
+  font-size: 0.88rem;
+  color: #2f855a;
+  font-weight: 600;
+}
+
+.price-bar-track {
+  height: 6px;
+  background: #edf2f7;
+  border-radius: 3px;
+  margin: 0.5rem 0;
+  max-width: 420px;
+  overflow: hidden;
+}
+
+.price-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4fd1c5, #3182ce);
+  border-radius: 3px;
+}
