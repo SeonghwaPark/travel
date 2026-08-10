@@ -85,6 +85,16 @@ start.bat
    - ✗ 실패: 화면에 표시되는 로그를 복사해서 알려주세요. 실패해도 검색은 날짜별 스캔 방식으로 자동 전환되어 동작합니다.
 3. 직접 확인하려면 `http://localhost:8000/api/flights/price-graph/health` 를 열어도 됩니다.
 
+### 테스트
+
+```bash
+cd backend
+python test_price_graph.py   # 가격 그래프 요청·응답 처리 (네트워크 불필요)
+```
+
+가격 그래프는 Google의 비공식 내부 API라 요청 구조가 조금만 어긋나도 빈 응답이 옵니다.
+이 테스트는 요청 페이로드를 Go 참조 구현과 대조해서 그런 어긋남을 미리 잡습니다.
+
 ### 문제 해결
 
 **백엔드가 아예 실행되지 않고 `ImportError: cannot import name 'FlightData'` 가 뜬다면**
