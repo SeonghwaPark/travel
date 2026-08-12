@@ -1,0 +1,46 @@
+{
+  "_comment": "감시할 항공권 목록. defaults 위에 각 watch가 덮어쓴다.",
+  "defaults": {
+    "origin": "ICN",
+    "adults": 1,
+    "children": 0,
+    "infants": 0,
+    "step": 1,
+    "max_queries": 40,
+    "alert": {
+      "target_price": null,
+      "drop_pct": 8,
+      "all_time_low": true
+    }
+  },
+  "watches": [
+    {
+      "id": "sapporo-feb2027",
+      "label": "삿포로 2027년 2월 가족여행",
+      "dest": "CTS",
+      "date_from": "2027-02-13",
+      "date_to": "2027-02-28",
+      "nights": [5, 6],
+      "adults": 2,
+      "children": 1,
+      "alert": {
+        "target_price": 1600000,
+        "drop_pct": 7
+      }
+    },
+    {
+      "id": "fukuoka-weekend",
+      "label": "후쿠오카 주말 2박 (예시 - 안 쓰면 지워도 됨)",
+      "dest": "FUK",
+      "date_from": "2026-10-01",
+      "date_to": "2026-11-30",
+      "nights": [2, 3],
+      "adults": 2,
+      "step": 3,
+      "max_queries": 24,
+      "alert": {
+        "drop_pct": 10
+      }
+    }
+  ]
+}

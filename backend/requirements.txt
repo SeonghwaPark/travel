@@ -1,3 +1,7 @@
 fastapi
 uvicorn
-fast-flights
+# 3.x에서 FlightData/TFSData -> FlightQuery/Query 로 API가 바뀌어 main.py와 호환되지 않음
+fast-flights==2.2
+# main.py가 직접 import 함 (fast-flights의 전이 의존이지만 명시)
+primp
+selectolax

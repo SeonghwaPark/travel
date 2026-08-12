@@ -1,0 +1,6 @@
+# 감시 봇(watch/) 전용 — FastAPI는 필요 없다
+# 3.x에서 FlightData/TFSData -> FlightQuery/Query 로 API가 바뀌어 gflights.py와 호환되지 않음
+fast-flights==2.2
+primp
+selectolax
+requests

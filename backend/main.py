@@ -1,26 +1,23 @@
 import sys, io
+# 원본 스트림 참조를 유지해야 함 — 안 그러면 GC가 원본 TextIOWrapper를 수거하면서
+# 밑에 깔린 buffer까지 닫아버려 이후 print가 "I/O operation on closed file"로 죽는다.
+_ORIG_STDOUT, _ORIG_STDERR = sys.stdout, sys.stderr
 if sys.stdout and hasattr(sys.stdout, 'buffer'):
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 if sys.stderr and hasattr(sys.stderr, 'buffer'):
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from fast_flights import FlightData, Passengers, TFSData
-from selectolax.lexbor import LexborHTMLParser
-import primp
 import asyncio
-import re
-import threading
-import time as _time
+import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 
-# Google 요청 간 최소 간격 (rate limiting 방지)
-_fetch_lock = threading.Lock()
-_last_fetch_time = 0.0
-_FETCH_INTERVAL = 1.5  # 최소 1.5초 간격
+# 스크래핑 코어는 gflights로 분리 — 감시 봇(watch/)도 같은 코드를 쓴다
+from gflights import parse_price, search_flights as _search_flights
 
 app = FastAPI()
 
@@ -98,74 +95,14 @@ DOMESTIC_REGIONS = {
     "yangyang":  {"name": "양양",    "keyword": "양양"},
 }
 
-AIRLINE_DEALS = [
-    {
-        "airline": "대한항공",
-        "logo": "KE",
-        "description": "대한항공 공식 특가 이벤트 및 프로모션",
-        "url": "https://www.koreanair.com/content/koreanair/kr/ko/offers/promotions.html",
-    },
-    {
-        "airline": "아시아나항공",
-        "logo": "OZ",
-        "description": "아시아나항공 특가 이벤트 및 얼리버드",
-        "url": "https://flyasiana.com/C/KR/KO/event/eventList",
-    },
-    {
-        "airline": "진에어",
-        "logo": "LJ",
-        "description": "진에어 특가 & 프로모션 이벤트",
-        "url": "https://www.jinair.com/promotion/list",
-    },
-    {
-        "airline": "제주항공",
-        "logo": "7C",
-        "description": "제주항공 땡처리 특가 이벤트",
-        "url": "https://www.jejuair.net/ko/promotion",
-    },
-    {
-        "airline": "티웨이항공",
-        "logo": "TW",
-        "description": "티웨이항공 특가 & 이벤트",
-        "url": "https://www.twayair.com/app/promotionEvents/promotionEventsList",
-    },
-    {
-        "airline": "에어부산",
-        "logo": "BX",
-        "description": "에어부산 특가 프로모션",
-        "url": "https://www.airbusan.com/promotion/list",
-    },
-    {
-        "airline": "에어서울",
-        "logo": "RS",
-        "description": "에어서울 특가 이벤트",
-        "url": "https://www.airseoul.com/promotion",
-    },
-    {
-        "airline": "에어프레미아",
-        "logo": "YP",
-        "description": "에어프레미아 특가 & 프로모션",
-        "url": "https://www.airpremia.com/promotion",
-    },
-    {
-        "airline": "땡처리닷컴",
-        "logo": "땡",
-        "description": "항공권·여행 땡처리 특가 모음",
-        "url": "https://www.ttour.com/flight",
-    },
-    {
-        "airline": "스카이스캐너",
-        "logo": "SK",
-        "description": "전 세계 항공사 최저가 비교",
-        "url": "https://www.skyscanner.co.kr/flights",
-    },
-    {
-        "airline": "클룩",
-        "logo": "KL",
-        "description": "항공권·패스·체험 특가 이벤트",
-        "url": "https://www.klook.com/ko/flights/",
-    },
-]
+# 감시 봇(watch/deals.py)과 같은 목록을 써야 하므로 리포 루트 airlines.json에서 읽는다
+_AIRLINES_JSON = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "airlines.json")
+try:
+    with open(_AIRLINES_JSON, encoding="utf-8") as _f:
+        AIRLINE_DEALS = json.load(_f)
+except (OSError, json.JSONDecodeError):
+    AIRLINE_DEALS = []
 
 KOREAN_AIRPORTS = {
     "ICN": "인천국제공항",
@@ -220,18 +157,7 @@ POPULAR_DESTINATIONS = {
 
 
 # ── Helpers ──
-
-def parse_price(price_str):
-    """'₩129,100' -> 129100"""
-    if price_str is None:
-        return None
-    if isinstance(price_str, (int, float)):
-        return int(price_str)
-    price_str = str(price_str)
-    nums = re.sub(r"[^\d]", "", price_str)
-    return int(nums) if nums else None
-
-
+# parse_price / 항공편 검색은 gflights 모듈로 이동함 (상단 import 참고)
 
 def google_flights_url(origin, destination, departure_date, return_date=None,
                        adults=1, children=0, infants_in_seat=0, infants_on_lap=0):
@@ -341,121 +267,6 @@ def _booking_links(origin, destination, departure_date, return_date=None,
         links["trip_com"] = trip_com_url(origin, destination, departure_date, return_date,
                                          adults, children, infants)
     return links
-
-
-def _parse_aria_label(label):
-    """aria-label에서 항공편 정보 추출"""
-    info = {"name": "", "price": "", "departure": "", "arrival": "",
-            "duration": "", "stops": 0}
-
-    label = re.sub(r"[\u202f\u00a0]", " ", label)
-
-    m = re.search(r"From ([\d,]+)", label)
-    if m:
-        info["price"] = m.group(1).replace(",", "")
-
-    m = re.search(r"(Nonstop|(\d+) stops?) flight with (.+?)\.", label)
-    if m:
-        if m.group(1) == "Nonstop":
-            info["stops"] = 0
-            info["name"] = m.group(3)
-        else:
-            info["stops"] = int(m.group(2))
-            info["name"] = m.group(3)
-
-    m = re.search(r"at (\d+:\d+ [AP]M) on", label)
-    if m:
-        info["departure"] = m.group(1)
-
-    m = re.search(r"arrives at .+? at (\d+:\d+ [AP]M)", label)
-    if m:
-        info["arrival"] = m.group(1)
-
-    m = re.search(r"Total duration (.+?)\.", label)
-    if m:
-        info["duration"] = m.group(1)
-
-    return info
-
-
-def _search_flights(origin, destination, departure_date, return_date, adults,
-                     children=0, infants_in_seat=0, infants_on_lap=0):
-    """Google Flights에서 항공편 검색 (aria-label 파싱, 최대 3회 재시도)"""
-    from datetime import datetime, timedelta
-    import time
-
-    effective_return = return_date
-    if not effective_return:
-        dep = datetime.strptime(departure_date, "%Y-%m-%d")
-        effective_return = (dep + timedelta(days=3)).strftime("%Y-%m-%d")
-
-    tfs = TFSData.from_interface(
-        flight_data=[
-            FlightData(date=departure_date, from_airport=origin, to_airport=destination),
-            FlightData(date=effective_return, from_airport=destination, to_airport=origin),
-        ],
-        trip="round-trip",
-        passengers=Passengers(
-            adults=adults, children=children,
-            infants_in_seat=infants_in_seat, infants_on_lap=infants_on_lap,
-        ),
-        seat="economy",
-    )
-    b64 = tfs.as_b64()
-    if isinstance(b64, bytes):
-        b64 = b64.decode("utf-8")
-    params = {"tfs": b64, "hl": "en", "tfu": "EgQIABABIgA", "curr": "KRW"}
-
-    # 최대 5회 시도, 매번 새 클라이언트로 요청
-    for attempt in range(5):
-        try:
-            # Rate limiting: 요청 간 최소 간격 유지
-            global _last_fetch_time
-            with _fetch_lock:
-                now = _time.time()
-                wait = _FETCH_INTERVAL - (now - _last_fetch_time)
-                if wait > 0:
-                    _time.sleep(wait)
-                _last_fetch_time = _time.time()
-
-            client = primp.Client(impersonate="chrome_131", verify=False)
-            res = client.get("https://www.google.com/travel/flights", params=params)
-            if res.status_code != 200:
-                print(f"[HTTP {res.status_code}] {origin}->{destination} 시도 {attempt+1}/5")
-                time.sleep(2)
-                continue
-
-            parser = LexborHTMLParser(res.text)
-
-            flights = []
-            for el in parser.css("div.JMc5Xc"):
-                label = el.attributes.get("aria-label", "")
-                if not label or "Select flight" not in label:
-                    continue
-                info = _parse_aria_label(label)
-                if info["price"]:
-                    flights.append(info)
-
-            if flights:
-                try:
-                    print(f"[OK] {origin}->{destination} | {len(flights)} flights | "
-                          f"top: {flights[0]['name'] or 'N/A'} {flights[0]['price']}won")
-                except Exception:
-                    pass
-                return flights
-            else:
-                try:
-                    print(f"[EMPTY] {origin}->{destination} attempt {attempt+1}/5 (Loading)")
-                except Exception:
-                    pass
-        except Exception as e:
-            try:
-                print(f"[FAIL] {origin}->{destination} attempt {attempt+1}/5: {e}")
-            except Exception:
-                pass
-        time.sleep(2)
-
-    return []
 
 
 # ── Airports ──

@@ -1,0 +1,68 @@
+[
+  {
+    "airline": "대한항공",
+    "logo": "KE",
+    "description": "대한항공 공식 특가 이벤트 및 프로모션",
+    "url": "https://www.koreanair.com/content/koreanair/kr/ko/offers/promotions.html"
+  },
+  {
+    "airline": "아시아나항공",
+    "logo": "OZ",
+    "description": "아시아나항공 특가 이벤트 및 얼리버드",
+    "url": "https://flyasiana.com/C/KR/KO/event/eventList"
+  },
+  {
+    "airline": "진에어",
+    "logo": "LJ",
+    "description": "진에어 특가 & 프로모션 이벤트",
+    "url": "https://www.jinair.com/promotion/list"
+  },
+  {
+    "airline": "제주항공",
+    "logo": "7C",
+    "description": "제주항공 땡처리 특가 이벤트",
+    "url": "https://www.jejuair.net/ko/promotion"
+  },
+  {
+    "airline": "티웨이항공",
+    "logo": "TW",
+    "description": "티웨이항공 특가 & 이벤트",
+    "url": "https://www.twayair.com/app/promotionEvents/promotionEventsList"
+  },
+  {
+    "airline": "에어부산",
+    "logo": "BX",
+    "description": "에어부산 특가 프로모션",
+    "url": "https://www.airbusan.com/promotion/list"
+  },
+  {
+    "airline": "에어서울",
+    "logo": "RS",
+    "description": "에어서울 특가 이벤트",
+    "url": "https://www.airseoul.com/promotion"
+  },
+  {
+    "airline": "에어프레미아",
+    "logo": "YP",
+    "description": "에어프레미아 특가 & 프로모션",
+    "url": "https://www.airpremia.com/promotion"
+  },
+  {
+    "airline": "땡처리닷컴",
+    "logo": "땡",
+    "description": "항공권·여행 땡처리 특가 모음",
+    "url": "https://www.ttour.com/flight"
+  },
+  {
+    "airline": "스카이스캐너",
+    "logo": "SK",
+    "description": "전 세계 항공사 최저가 비교",
+    "url": "https://www.skyscanner.co.kr/flights"
+  },
+  {
+    "airline": "클룩",
+    "logo": "KL",
+    "description": "항공권·패스·체험 특가 이벤트",
+    "url": "https://www.klook.com/ko/flights/"
+  }
+]

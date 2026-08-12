@@ -83,6 +83,66 @@ travel/
 
 ---
 
+## 🔎 날짜 범위 최저가 스캐너
+
+특정 날짜가 아니라 **"언제가 제일 싼가"**를 찾는다. 성기게 훑어 저렴한 구간을 찾고(coarse),
+그 주변만 하루 단위로 다시 훑는다(refine). 조회 결과는 캐시에 남아 중간에 끊겨도 이어서 돈다.
+
+```bash
+cd backend
+python scan_cheapest.py --dest CTS --start 2027-02-01 --end 2027-02-28 \
+    --nights 2,3,4,5 --step 1 --adults 2 --children 1 --tag sapporo
+```
+
+결과는 `backend/out/` 아래 JSON·CSV로 저장된다.
+
+| 옵션 | 설명 |
+|------|------|
+| `--nights` | 비교할 박수 목록 (`2,3,4,5`) |
+| `--coarse-nights` | coarse 단계에서만 쓸 박수 (기본: `--nights` 전체) |
+| `--step` | coarse 날짜 간격(일) |
+| `--refine-top` / `--refine-window` | 정밀 재탐색할 상위 구간 수 / 앞뒤 ±일 |
+| `--no-refine` | coarse만 실행 |
+
+> 💡 가격은 **전체 승객 합계** 기준이다 (성인2+소아1이면 3명 총액).
+
+---
+
+## 🔔 특가 감시 봇
+
+`watchlist.json`에 노선을 등록해두면 정기적으로 훑어 **특가일 때만** 텔레그램으로 알린다.
+
+```bash
+python -m watch.main --dry-run              # 조회·판정만
+python -m watch.main --only sapporo-feb2027 # 특정 대상만
+python -m watch.main --with-deals           # 항공사 프로모션 페이지도 확인
+```
+
+**알림 조건** (하나라도 걸리면 발송)
+
+| 조건 | 설정 키 | 의미 |
+|------|---------|------|
+| 🎯 목표가 | `target_price` | 지정 금액 이하로 하락 |
+| 📉 하락률 | `drop_pct` | 직전 관측 대비 N% 이상 하락 |
+| 🏆 역대 최저 | `all_time_low` | 과거 최저가 경신 (관측 3회 이상부터) |
+| 🔥 할인률 | `discount_pct` | 평소 시세(과거 중앙값) 대비 N% 이상 저렴 |
+
+관측 이력은 `history/<watch-id>.jsonl`에 쌓이고 GitHub Actions가 커밋한다.
+
+> 📌 **항공사 프로모션 페이지 크롤링은 기본 꺼져 있다** (`--with-deals`로 켬).
+> 국내 항공사 특가 페이지 대부분이 JS로 목록을 그리는 SPA거나 봇을 차단해서
+> 실제로 잡히는 곳이 거의 없다. 대신 **항공사가 특가를 풀면 Google Flights 가격이
+> 내려가므로 위의 하락률·할인률 규칙이 그걸 잡는다.** 가격 감시가 더 확실한 특가 감지기다.
+
+**자동 실행**: `.github/workflows/fare-watch.yml`이 매일 09:00 / 21:00 KST에 돈다.
+리포지토리 Secrets에 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`를 넣어야 발송된다.
+
+> ⚠️ **자동 예약은 지원하지 않는다.** 항공사 결제는 본인인증·3D Secure가 걸려 있어
+> 자동화가 불가능하고 시도 자체가 약관 위반이다. 감지 후 예약 페이지 딥링크를
+> 즉시 보내주는 것까지가 이 봇의 역할이다.
+
+---
+
 <p align="center">
   <sub>⚡ Compare. Choose. Fly. ⚡</sub>
 </p>

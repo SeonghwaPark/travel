@@ -1,0 +1,61 @@
+name: fare-watch
+
+on:
+  schedule:
+    # 00:00 UTC = 09:00 KST, 12:00 UTC = 21:00 KST (한국은 서머타임 없음)
+    - cron: "0 0,12 * * *"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "특정 watch id만 실행 (비우면 전체)"
+        type: string
+        default: ""
+      dry_run:
+        description: "발송·저장 없이 판정만"
+        type: boolean
+        default: false
+
+# 가격 이력을 리포지토리에 커밋해야 실행 간에 이어진다
+permissions:
+  contents: write
+
+concurrency:
+  group: fare-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements-watch.txt
+
+      - name: Run fare watch
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.only }}" ]; then ARGS="$ARGS --only ${{ inputs.only }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          python -m watch.main $ARGS
+
+      - name: Commit price history
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history/
+          if git diff --staged --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "chore: 항공권 가격 이력 갱신 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+            # 동시 실행이나 수동 푸시와 충돌하면 리베이스 후 재시도
+            git pull --rebase --autostash origin ${{ github.ref_name }}
+            git push
+          fi
