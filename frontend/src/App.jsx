@@ -10,6 +10,8 @@ import ActivityResults from './components/ActivityResults'
 import DomesticForm from './components/DomesticForm'
 import DomesticResults from './components/DomesticResults'
 import AirlineDeals from './components/AirlineDeals'
+import SpotSearch from './components/SpotSearch'
+import TripPlanner from './components/TripPlanner'
 import './App.css'
 
 const API = 'http://localhost:8000/api'
@@ -67,13 +69,15 @@ function App() {
     { id: 'activities', label: '해외 액티비티' },
     { id: 'domestic', label: '국내여행' },
     { id: 'airline-deals', label: '항공사 특가' },
+    { id: 'spots', label: '맛집·관광지' },
+    { id: 'planner', label: '여행 일정' },
   ]
 
   return (
     <div className="app">
       <header className="header">
-        <h1>여행 검색</h1>
-        <p>한국 출발 해외여행 항공편, 숙박, 액티비티를 한번에</p>
+        <h1>Travel Search</h1>
+        <p>항공편, 숙박, 맛집, 일정까지 한번에 검색하세요</p>
       </header>
 
       <div className="tabs">
@@ -153,6 +157,14 @@ function App() {
 
         {tab === 'airline-deals' && (
           <AirlineDeals />
+        )}
+
+        {tab === 'spots' && (
+          <SpotSearch />
+        )}
+
+        {tab === 'planner' && (
+          <TripPlanner />
         )}
       </main>
     </div>

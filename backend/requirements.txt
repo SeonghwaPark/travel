@@ -1,7 +1,12 @@
 fastapi
 uvicorn
-# 3.x에서 FlightData/TFSData -> FlightQuery/Query 로 API가 바뀌어 main.py와 호환되지 않음
+# 3.x에서 FlightData/TFSData -> FlightQuery/Query 로 API가 바뀌어 gflights.py와 호환되지 않음
 fast-flights==2.2
-# main.py가 직접 import 함 (fast-flights의 전이 의존이지만 명시)
+# gflights.py가 직접 import 함 (fast-flights의 전이 의존이지만 명시)
 primp
 selectolax
+# AI 여행 플래너용
+openai
+google-genai
+groq
+python-dotenv
