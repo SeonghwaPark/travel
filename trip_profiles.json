@@ -1,0 +1,432 @@
+{
+  "_comment": "목적지별 기준 데이터. 총예산 합산과 추천에 쓴다. 항공권·숙박은 실측하지만 현지비·비행시간·적합도는 잘 안 변하는 값이라 여기 둔다.",
+  "_warning": "daily_cost는 어림값이다. 실측이 아니라 판단 보조용이며, 브리프에 추정치임이 표시된다.",
+  "_daily_cost_note": "1인 1일 현지비 어림 (식비 + 시내교통 + 입장료). 숙박·항공권은 제외. 성인 기준이며 아동은 0.6배로 계산한다.",
+  "_noted_at": "2026-08-13",
+  "child_cost_ratio": 0.6,
+  "destinations": {
+    "CTS": {
+      "name": "삿포로",
+      "daily_cost": 90000,
+      "flight_hours": 3.0,
+      "transport_region": "hokkaido",
+      "family": {
+        "score": 4,
+        "why": "눈놀이·스키·동물원 등 아이가 몸으로 즐길 거리가 많다. 다만 방한 준비와 추위로 체력 소모가 크다."
+      },
+      "best_months": [
+        1,
+        2,
+        12
+      ],
+      "season_note": "1~2월이 제철. 파우더 스노우는 1월이 정점이고 2월엔 눈축제가 열린다. 3월 중순부터는 눈이 녹는다.",
+      "highlights": [
+        {
+          "name": "삿포로 눈축제",
+          "for": "2월 초·중순 한정",
+          "kid": true
+        },
+        {
+          "name": "시로이코이비토 파크",
+          "for": "초콜릿 공장 견학·쿠키 만들기, 실내",
+          "kid": true
+        },
+        {
+          "name": "테이네·반케이 스키장",
+          "for": "시내에서 30~60분, 반나절 강습",
+          "kid": true
+        },
+        {
+          "name": "모이와산 로프웨이",
+          "for": "야경",
+          "kid": false
+        },
+        {
+          "name": "오타루",
+          "for": "쾌속 40분, 운하·오르골당",
+          "kid": true
+        },
+        {
+          "name": "노보리베츠",
+          "for": "온천 1박, 지고쿠다니·다테지다이무라",
+          "kid": true
+        },
+        {
+          "name": "하코다테",
+          "for": "특급 3.5시간, 야경·아침시장·럭키피에로",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 170000
+    },
+    "HKD": {
+      "name": "하코다테",
+      "daily_cost": 85000,
+      "flight_hours": 3.0,
+      "transport_region": "hokkaido",
+      "family": {
+        "score": 3,
+        "why": "야경·시장 중심이라 어른 취향에 가깝다. 럭키피에로는 아이에게 확실히 통한다."
+      },
+      "best_months": [
+        1,
+        2,
+        12
+      ],
+      "season_note": "삿포로보다 남쪽이라 눈이 먼저 녹는다. 설경을 원하면 2월 중순 이전.",
+      "highlights": [
+        {
+          "name": "하코다테산 야경",
+          "for": "로프웨이, 겨울엔 바람으로 운휴 가능",
+          "kid": false
+        },
+        {
+          "name": "아침시장",
+          "for": "해산물덮밥, 오전에 끝남",
+          "kid": false
+        },
+        {
+          "name": "럭키피에로",
+          "for": "로컬 버거, 싸고 양 많음",
+          "kid": true
+        },
+        {
+          "name": "고료카쿠 타워",
+          "for": "별 모양 성터",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 150000
+    },
+    "TPE": {
+      "name": "타이베이",
+      "daily_cost": 60000,
+      "flight_hours": 2.5,
+      "family": {
+        "score": 3,
+        "why": "먹거리·분위기 중심이라 어른 취향이 강하다. 아이용은 천등·동물원·곤돌라 정도."
+      },
+      "best_months": [
+        4,
+        5,
+        10,
+        11
+      ],
+      "season_note": "1~3월 북부는 흐리고 비가 잦다. 겨울에 간다면 남부(타이난·가오슝) 비중을 키워야 한다. 춘절(2월 초)엔 상점이 대거 휴업.",
+      "highlights": [
+        {
+          "name": "스펀 천등 날리기",
+          "for": "소원 적어 하늘로",
+          "kid": true
+        },
+        {
+          "name": "지우펀",
+          "for": "홍등 거리, 스펀과 묶어 하루",
+          "kid": false
+        },
+        {
+          "name": "타이베이 동물원 + 마오콩 곤돌라",
+          "for": "판다, 유리바닥 곤돌라. 붙어 있음",
+          "kid": true
+        },
+        {
+          "name": "베이터우 온천",
+          "for": "지하철로 가는 온천, 가족탕 많음",
+          "kid": true
+        },
+        {
+          "name": "국립대만과학교육관",
+          "for": "체험형 실내, 비 오는 날 대안",
+          "kid": true
+        },
+        {
+          "name": "타이난·가오슝",
+          "for": "고속철 2시간, 겨울에도 맑고 따뜻",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 130000
+    },
+    "KHH": {
+      "name": "가오슝",
+      "daily_cost": 55000,
+      "flight_hours": 3.0,
+      "family": {
+        "score": 3,
+        "why": "따뜻하고 여유롭지만 아이 전용 시설은 적다."
+      },
+      "best_months": [
+        1,
+        2,
+        3,
+        11,
+        12
+      ],
+      "season_note": "겨울에도 맑고 25도 안팎. 대만에서 겨울 여행지로는 북부보다 낫다.",
+      "highlights": [
+        {
+          "name": "치진섬",
+          "for": "페리 10분, 해산물·모래사장",
+          "kid": true
+        },
+        {
+          "name": "롄츠탄 용호탑",
+          "for": "사진 명소",
+          "kid": false
+        },
+        {
+          "name": "보얼예술특구",
+          "for": "창고 개조 예술지구",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 110000
+    },
+    "HKG": {
+      "name": "홍콩",
+      "daily_cost": 110000,
+      "flight_hours": 3.5,
+      "family": {
+        "score": 5,
+        "why": "디즈니랜드와 오션파크가 둘 다 있다. 이 가격대에서 아이 콘텐츠가 가장 확실하다."
+      },
+      "best_months": [
+        11,
+        12,
+        1,
+        2,
+        3
+      ],
+      "season_note": "겨울이 건기라 15~20도에 맑다. 대만 북부와 정반대로 2월이 최적기다.",
+      "highlights": [
+        {
+          "name": "홍콩 디즈니랜드",
+          "for": "디즈니 중 가장 작지만 대기가 짧다",
+          "kid": true
+        },
+        {
+          "name": "오션파크",
+          "for": "수족관 + 놀이기구, 섬 반대편",
+          "kid": true
+        },
+        {
+          "name": "피크트램·빅토리아 피크",
+          "for": "야경",
+          "kid": false
+        },
+        {
+          "name": "마카오 당일치기",
+          "for": "페리 1시간",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 250000
+    },
+    "NRT": {
+      "name": "도쿄",
+      "daily_cost": 100000,
+      "flight_hours": 2.5,
+      "family": {
+        "score": 5,
+        "why": "도쿄 디즈니랜드·디즈니씨 규모가 압도적이고 지브리·동물원까지 있다."
+      },
+      "best_months": [
+        3,
+        4,
+        10,
+        11
+      ],
+      "season_note": "2월은 춥지만 건조하고 맑은 날이 많다. 실내 시설이 풍부해 날씨 리스크가 작다.",
+      "highlights": [
+        {
+          "name": "도쿄 디즈니랜드·디즈니씨",
+          "for": "이틀은 필요",
+          "kid": true
+        },
+        {
+          "name": "지브리 미술관",
+          "for": "사전 예약 필수",
+          "kid": true
+        },
+        {
+          "name": "우에노 동물원",
+          "for": "판다, 공원과 함께",
+          "kid": true
+        },
+        {
+          "name": "오다이바",
+          "for": "실내 놀거리 밀집",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 200000
+    },
+    "KIX": {
+      "name": "오사카",
+      "daily_cost": 90000,
+      "flight_hours": 2.0,
+      "family": {
+        "score": 5,
+        "why": "유니버설·카이유칸·나라 사슴공원이 모두 1시간 안에 있다."
+      },
+      "best_months": [
+        3,
+        4,
+        10,
+        11
+      ],
+      "season_note": "2월은 춥지만 실내 시설이 많다. 교토·고베·나라가 30분~1시간 거리라 확장성이 좋다.",
+      "highlights": [
+        {
+          "name": "유니버설 스튜디오 재팬",
+          "for": "8세 전후에 최적",
+          "kid": true
+        },
+        {
+          "name": "가이유칸 수족관",
+          "for": "세계 최대급, 실내",
+          "kid": true
+        },
+        {
+          "name": "나라 사슴공원",
+          "for": "전철 40분",
+          "kid": true
+        },
+        {
+          "name": "교토",
+          "for": "30분~1시간",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 180000
+    },
+    "FUK": {
+      "name": "후쿠오카",
+      "daily_cost": 85000,
+      "flight_hours": 1.5,
+      "family": {
+        "score": 3,
+        "why": "온천과 먹거리 중심. 아이가 열광할 요소는 적지만 이동이 가장 편하다."
+      },
+      "best_months": [
+        3,
+        4,
+        10,
+        11
+      ],
+      "season_note": "겨울에도 홋카이도보다 훨씬 온화하다. 공항에서 시내까지 지하철 5분으로 접근성이 최상.",
+      "highlights": [
+        {
+          "name": "유후인",
+          "for": "온천 마을, 특급 2시간",
+          "kid": false
+        },
+        {
+          "name": "벳푸 지옥순례",
+          "for": "온천 지대 구경",
+          "kid": true
+        },
+        {
+          "name": "다자이후",
+          "for": "전철 30분",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 160000
+    },
+    "OKA": {
+      "name": "오키나와",
+      "daily_cost": 85000,
+      "flight_hours": 2.5,
+      "family": {
+        "score": 4,
+        "why": "츄라우미 수족관이 강력하다. 다만 2월엔 물놀이가 안 돼 매력이 반감된다."
+      },
+      "best_months": [
+        4,
+        5,
+        6,
+        10,
+        11
+      ],
+      "season_note": "2월은 18~20도로 온화하지만 해수욕은 불가. 수족관·드라이브 위주가 된다.",
+      "highlights": [
+        {
+          "name": "츄라우미 수족관",
+          "for": "세계적 규모, 고래상어",
+          "kid": true
+        },
+        {
+          "name": "아메리칸 빌리지",
+          "for": "쇼핑·식당",
+          "kid": false
+        },
+        {
+          "name": "만좌모",
+          "for": "해안 절경",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 170000
+    },
+    "CEB": {
+      "name": "세부",
+      "daily_cost": 70000,
+      "flight_hours": 4.5,
+      "family": {
+        "score": 4,
+        "why": "리조트 물놀이가 확실하다. 다만 비행이 길고 시내 이동이 번잡하다."
+      },
+      "best_months": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "season_note": "건기라 2월이 좋다. 리조트에 머무는 형태면 만족도가 높다.",
+      "highlights": [
+        {
+          "name": "리조트 물놀이",
+          "for": "숙소 자체가 목적지",
+          "kid": true
+        },
+        {
+          "name": "아일랜드 호핑",
+          "for": "배 투어",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 160000
+    },
+    "GUM": {
+      "name": "괌",
+      "daily_cost": 130000,
+      "flight_hours": 4.5,
+      "family": {
+        "score": 4,
+        "why": "안전하고 리조트가 잘 갖춰져 있다. 물가가 비싼 게 부담."
+      },
+      "best_months": [
+        12,
+        1,
+        2,
+        3
+      ],
+      "season_note": "2월은 건기로 날씨가 좋다.",
+      "highlights": [
+        {
+          "name": "리조트 워터파크",
+          "for": "숙소 내에서 해결",
+          "kid": true
+        },
+        {
+          "name": "돌핀 크루즈",
+          "for": "반나절",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 280000
+    }
+  },
+  "_lodging_note": "lodging_per_night은 3인 1실 중급 숙소 1박 어림값(KRW)이다. 숙박 스캔 실측이 있으면 브리프가 그걸 우선 쓰고, 없을 때만 이 값을 쓴다."
+}
