@@ -190,3 +190,73 @@ def test_run_rejects_empty_destination_set(stub_graph):
     with pytest.raises(SystemExit):
         explore_main.run(["--start", "2027-02-01", "--end", "2027-02-10",
                           "--only", "NOPE"])
+
+
+def test_default_tag_includes_nights_and_pax(stub_graph, monkeypatch):
+    """같은 기간을 조건만 바꿔 돌릴 때 앞 결과를 덮어쓰지 않아야 한다."""
+    _calls, tmp_path = stub_graph
+    common = ["--start", "2027-02-01", "--end", "2027-02-28", "--only", "FUK"]
+    explore_main.run(common + ["--nights", "5,6", "--adults", "2", "--children", "1"])
+    explore_main.run(common + ["--nights", "3", "--adults", "1"])
+
+    names = sorted(p.name for p in tmp_path.glob("*.json"))
+    assert names == ["ICN-2027-02-01-2027-02-28-3n-1a0c0i.json",
+                     "ICN-2027-02-01-2027-02-28-5-6n-2a1c0i.json"], names
+
+
+# ── 날짜별 곡선 ──
+
+def test_date_curve_keeps_every_departure_date():
+    """가격 그래프가 받아온 날짜를 집계에서 버리지 않는다."""
+    s = rank_mod.summarize(
+        "CTS", {"name": "삿포로"},
+        {5: _offers(("2027-02-01", "2027-02-06", 1827000),
+                    ("2027-02-10", "2027-02-15", 1600000)),
+         6: _offers(("2027-02-10", "2027-02-16", 1552000),
+                    ("2027-02-17", "2027-02-23", 1457500))},
+        pax=3)
+    curve = s["date_curve"]
+    assert [d["departure_date"] for d in curve] == ["2027-02-01", "2027-02-10", "2027-02-17"]
+    # 같은 출발일에 5박/6박이 다 있으면 싼 쪽만 남는다
+    feb10 = next(d for d in curve if d["departure_date"] == "2027-02-10")
+    assert feb10["price"] == 1552000 and feb10["nights"] == 6
+    assert feb10["per_person"] == 517333
+
+
+def test_cheapest_dates_sorts_by_price_and_limits():
+    s = rank_mod.summarize(
+        "CTS", {}, {5: _offers(*[(f"2027-02-{d:02d}", f"2027-02-{d+5:02d}", 900000 - d * 1000)
+                                 for d in range(1, 13)])}, pax=1)
+    top = rank_mod.cheapest_dates(s, 3)
+    assert [d["departure_date"] for d in top] == ["2027-02-12", "2027-02-11", "2027-02-10"]
+    assert rank_mod.cheapest_dates(s, 100) == sorted(s["date_curve"], key=lambda d: d["price"])
+
+
+def test_markdown_includes_date_tables():
+    s = rank_mod.summarize(
+        "CTS", {"name": "삿포로"},
+        {6: _offers(("2027-02-10", "2027-02-16", 1552000),
+                    ("2027-02-17", "2027-02-23", 1457500))},
+        pax=3)
+    md = rank_mod.to_markdown({
+        "meta": {"origin": "ICN", "start": "2027-02-01", "end": "2027-02-28",
+                 "nights": [6], "adults": 2, "children": 1, "infants": 0,
+                 "scanned": 1, "scanned_at": "2026-08-13 07:00:00"},
+        "ranking": [s], "failed": []})
+    assert "목적지별 싼 출발일" in md
+    assert "2027-02-10" in md and "1,552,000원" in md
+
+
+def test_markdown_notes_dropped_destinations():
+    """실은 목적지 수를 줄였으면 조용히 자르지 말고 알린다."""
+    ranking = [rank_mod.summarize(f"D{i:02d}", {"name": f"목적지{i}"},
+                                  {3: _offers((f"2027-02-{i+1:02d}", "2027-02-20", 100000 + i))},
+                                  pax=1)
+               for i in range(rank_mod.DETAIL_DESTINATIONS + 3)]
+    md = rank_mod.to_markdown({
+        "meta": {"origin": "ICN", "start": "2027-02-01", "end": "2027-02-28",
+                 "nights": [3], "adults": 1, "children": 0, "infants": 0,
+                 "scanned": len(ranking), "scanned_at": "2026-08-13 07:00:00"},
+        "ranking": ranking, "failed": []})
+    assert f"상위 {rank_mod.DETAIL_DESTINATIONS}곳만" in md
+    assert "나머지 3곳" in md

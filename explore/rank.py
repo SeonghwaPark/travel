@@ -6,6 +6,9 @@
 
 import statistics
 
+TOP_DATES = 10           # 목적지별로 마크다운에 싣는 싼 출발일 수
+DETAIL_DESTINATIONS = 8  # 날짜 표를 실을 상위 목적지 수 (JSON에는 전부 들어간다)
+
 
 def summarize(dest_code, info, offers_by_nights, pax):
     """한 목적지의 조회 결과를 요약한다.
@@ -27,6 +30,21 @@ def summarize(dest_code, info, offers_by_nights, pax):
     best = min(flat, key=lambda o: o["price"])
     median = int(statistics.median(prices))
 
+    # 출발일별 최저가 곡선. 가격 그래프는 날짜별 가격을 전부 받아오는데 최저가
+    # 한 건만 남기면 "그럼 3일 출발은 얼마인데?"에 답하려고 스캔을 또 돌려야 한다.
+    # 같은 출발일에 박수가 여럿이면 싼 쪽만 남긴다.
+    by_date = {}
+    for o in flat:
+        cur = by_date.get(o["departure_date"])
+        if cur is None or o["price"] < cur["price"]:
+            by_date[o["departure_date"]] = {
+                "departure_date": o["departure_date"],
+                "return_date": o["return_date"],
+                "nights": o["nights"],
+                "price": o["price"],
+                "per_person": round(o["price"] / pax) if pax else o["price"],
+            }
+
     return {
         "code": dest_code,
         "name": info.get("name", dest_code),
@@ -40,7 +58,13 @@ def summarize(dest_code, info, offers_by_nights, pax):
         # 그 목적지 안에서 이 날짜가 얼마나 좋은 타이밍인가 (기간 중앙값 대비)
         "dip_pct": round((median - best["price"]) / median * 100, 1) if median else 0.0,
         "observed": len(prices),
+        "date_curve": [by_date[d] for d in sorted(by_date)],
     }
+
+
+def cheapest_dates(summary, n=10):
+    """한 목적지의 싼 출발일 상위 n개."""
+    return sorted(summary.get("date_curve", []), key=lambda d: d["price"])[:n]
 
 
 def rank(summaries):
@@ -95,6 +119,29 @@ def to_markdown(result):
         "",
         "> 가격은 Google Flights 표시가(왕복, 전체 승객 합계)다. 실제 결제가는 예약처에서 확인해야 한다.",
     ]
+
+    # 날짜별 곡선 — 상위 목적지만. 전부 실으면 25곳 × 날짜라 표가 읽기 어려워진다.
+    detailed = result["ranking"][:DETAIL_DESTINATIONS]
+    if any(r.get("date_curve") for r in detailed):
+        lines += ["", "---", "", f"## 목적지별 싼 출발일 (상위 {TOP_DATES}개)", ""]
+        if len(result["ranking"]) > DETAIL_DESTINATIONS:
+            lines += [f"> 순위 상위 {DETAIL_DESTINATIONS}곳만 싣는다. "
+                      f"나머지 {len(result['ranking']) - DETAIL_DESTINATIONS}곳의 "
+                      f"날짜별 가격은 같은 이름의 JSON 파일에 전부 들어 있다.", ""]
+        for r in detailed:
+            top = cheapest_dates(r, TOP_DATES)
+            if not top:
+                continue
+            lines += [
+                f"### {r['name']} ({r['code']})",
+                "",
+                "| 출발 | 귀국 | 박 | 총액 | 1인당 |",
+                "|------|------|----|------|-------|",
+            ]
+            for d in top:
+                lines.append(f"| {d['departure_date']} | {d['return_date']} | {d['nights']} | "
+                             f"{_won(d['price'])} | {_won(d['per_person'])} |")
+            lines.append("")
 
     if result.get("failed"):
         lines += ["", f"조회 실패: {', '.join(result['failed'])}"]

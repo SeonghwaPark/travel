@@ -20,6 +20,14 @@
       "name": "후쿠오카",
       "country": "일본"
     },
+    "CTS": {
+      "name": "삿포로 (신치토세)",
+      "country": "일본"
+    },
+    "HKD": {
+      "name": "하코다테",
+      "country": "일본"
+    },
     "BKK": {
       "name": "방콕",
       "country": "태국"
@@ -34,6 +42,10 @@
     },
     "TPE": {
       "name": "타이베이",
+      "country": "대만"
+    },
+    "KHH": {
+      "name": "가오슝",
       "country": "대만"
     },
     "DAD": {
