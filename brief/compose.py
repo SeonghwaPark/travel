@@ -10,6 +10,7 @@
 
 import json
 import os
+from datetime import date
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROFILES_JSON = os.path.join(_ROOT, "trip_profiles.json")
@@ -91,6 +92,64 @@ def read_stay_scans(results_dir=None):
     return out
 
 
+QUOTES_JSON = os.path.join(_ROOT, "lodging_quotes.json")
+
+# 숙박비는 그때그때 변한다 — 견적은 날짜가 맞고 신선할 때만 실측으로 인정한다.
+QUOTE_DATE_TOLERANCE = 14   # 여행 창과 안 겹쳐도 체크인이 이 안이면 같은 시즌으로 본다
+QUOTE_FRESH_DAYS = 45       # 이 안이면 신선(±10%), 넘으면 낡음(±25%)
+QUOTE_STALE_DAYS = 180      # 이걸 넘으면 버린다
+
+
+def read_lodging_quotes(path=None, adults=None, children=None):
+    """직접 확인한 숙박 견적. 인원이 다르면 방 구성이 달라 걸러낸다."""
+    try:
+        with open(path or QUOTES_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    out = []
+    for q in data.get("quotes", []):
+        if adults is not None and q.get("adults") != adults:
+            continue
+        if children is not None and q.get("children") != children:
+            continue
+        out.append(q)
+    return out
+
+
+def _days_apart(a, b):
+    return abs((date.fromisoformat(b) - date.fromisoformat(a)).days)
+
+
+def match_quote(quotes, code, check_in, check_out, today=None):
+    """여행 창과 맞는 가장 신선한 견적. 없으면 None.
+
+    quoted_at이 없거나 KRW가 아닌 견적은 버린다 — 나이를 모르는 값과
+    통화가 섞인 값은 실측이라 부를 수 없다.
+    """
+    if not (check_in and check_out):
+        return None
+    today = today or date.today().isoformat()
+    best = None
+    for q in quotes:
+        if q.get("dest") != code or "quoted_at" not in q:
+            continue
+        if q.get("currency", "KRW") != "KRW":
+            continue
+        try:
+            overlap = not (q["check_out"] <= check_in or check_out <= q["check_in"])
+            near = _days_apart(q["check_in"], check_in) <= QUOTE_DATE_TOLERANCE
+            age = _days_apart(q["quoted_at"], today)
+        except (KeyError, ValueError):
+            continue
+        if not (overlap or near) or age > QUOTE_STALE_DAYS:
+            continue
+        cand = {**q, "age_days": age, "stale": age > QUOTE_FRESH_DAYS}
+        if best is None or cand["age_days"] < best["age_days"]:
+            best = cand
+    return best
+
+
 # ── 합산 ──
 
 def estimate_budget(profile, nights, adults, children, flight_total,
@@ -106,8 +165,9 @@ def estimate_budget(profile, nights, adults, children, flight_total,
 
     if stay:
         per_night, stay_src = stay["per_night"], MEASURED
-        stay_conf, season = "high", {"factor": 1.0, "reason": None,
-                                     "confidence": None, "lunar": False}
+        stay_conf = stay.get("confidence", "high")
+        season = {"factor": 1.0, "reason": None,
+                  "confidence": None, "lunar": False}
     else:
         per_night, stay_src = profile["lodging_per_night"], ESTIMATED
         stay_conf = profile.get("lodging_confidence", "low")
@@ -124,8 +184,11 @@ def estimate_budget(profile, nights, adults, children, flight_total,
          "note": f"{adults}성인+{children}소아 왕복 합계"},
         {"label": "숙박", "amount": lodging, "source": stay_src,
          "confidence": stay_conf,
+         **({"band": stay["band"]} if stay and "band" in stay else {}),
          "note": f"1박 {per_night:,}원 × {nights}박"
-                 + (f" ({stay['area']})" if stay
+                 + ((f" ({stay['area']}"
+                     + (f", {stay['checked']} 확인" if stay.get("checked") else "")
+                     + ")") if stay
                     else f" (3인 1실 어림"
                          + (f" × {season['factor']} {season['reason']}"
                             if season["reason"] else "") + ")")},
@@ -139,7 +202,12 @@ def estimate_budget(profile, nights, adults, children, flight_total,
 
     for i in items:
         i.setdefault("confidence", "high" if i["source"] == MEASURED else "low")
-        band = 0.0 if i["source"] == MEASURED else bands.get(i["confidence"], 0.40)
+        if "band" in i:
+            band = i.pop("band")   # 직접 확인 견적 — 실측이지만 시점 오차는 남는다
+        elif i["source"] == MEASURED:
+            band = 0.0
+        else:
+            band = bands.get(i["confidence"], 0.40)
         i["low"] = round(i["amount"] * (1 - band))
         i["high"] = round(i["amount"] * (1 + band))
 
@@ -193,7 +261,7 @@ def _month_of(date_str):
 
 
 def build(candidates, profiles, flights, stays, adults, children,
-          nights, transport_costs=None):
+          nights, transport_costs=None, quotes=None, today=None):
     """후보별 예산·적합도를 계산해 총액 오름차순으로 돌려준다."""
     transport_costs = transport_costs or {}
     child_ratio = profiles.get("child_cost_ratio", 0.6)
@@ -215,9 +283,19 @@ def build(candidates, profiles, flights, stays, adults, children,
                             f"{flight['party'][1]}소아)"))
             continue
 
+        stay = stays.get(code)
+        quote = match_quote(quotes or [], code, flight.get("departure_date"),
+                            flight.get("return_date"), today=today)
+        if quote:
+            stay = {"per_night": quote["per_night"],
+                    "area": quote.get("hotel") or quote.get("area") or "직접 확인",
+                    "checked": quote["quoted_at"],
+                    "band": 0.25 if quote["stale"] else 0.10,
+                    "confidence": "medium" if quote["stale"] else "high"}
+
         budget = estimate_budget(
             profile, nights, adults, children, flight["best_price"],
-            stay=stays.get(code), transport_total=transport_costs.get(code, 0),
+            stay=stay, transport_total=transport_costs.get(code, 0),
             child_ratio=child_ratio, check_in=flight.get("departure_date"),
             bands=profiles.get("confidence_bands"))
 
@@ -229,7 +307,7 @@ def build(candidates, profiles, flights, stays, adults, children,
             "name": profile["name"],
             "budget": budget,
             "flight": flight,
-            "stay": stays.get(code),
+            "stay": stay,
             "flight_hours": profile["flight_hours"],
             "family_score": profile["family"]["score"],
             "family_why": profile["family"]["why"],

@@ -299,3 +299,88 @@ def test_tiers_chain_transitively():
             _row("C", 180, 160, 210), _row("D", 900, 880, 920)]
     compose.mark_separability(rows)
     assert [r["tier"] for r in rows] == [0, 0, 0, 1]
+
+
+# ── 직접 확인 견적 ──
+
+QUOTE = {"dest": "AAA", "check_in": "2027-02-17", "check_out": "2027-02-23",
+         "adults": 2, "children": 1, "per_night": 150000, "currency": "KRW",
+         "area": "역앞", "source": "booking.com", "quoted_at": "2026-08-10"}
+TODAY = "2026-08-20"
+
+
+def test_quote_matches_overlapping_window():
+    q = compose.match_quote([QUOTE], "AAA", "2027-02-19", "2027-02-25", today=TODAY)
+    assert q and q["per_night"] == 150000 and q["stale"] is False
+
+
+def test_quote_matches_nearby_window():
+    """창이 안 겹쳐도 체크인이 ±14일 안이면 같은 시즌으로 본다."""
+    q = compose.match_quote([QUOTE], "AAA", "2027-02-25", "2027-03-03", today=TODAY)
+    assert q is not None
+
+
+def test_quote_rejects_far_window():
+    """2월 견적을 7월 여행에 쓰면 안 된다 — 숙박비는 시기 따라 다르다."""
+    assert compose.match_quote([QUOTE], "AAA", "2027-07-01", "2027-07-07",
+                               today=TODAY) is None
+
+
+def test_quote_rejects_other_destination():
+    assert compose.match_quote([QUOTE], "BBB", "2027-02-17", "2027-02-23",
+                               today=TODAY) is None
+
+
+def test_quote_ages_out():
+    """45일 지나면 낡음 표시, 180일 지나면 버린다."""
+    q = compose.match_quote([QUOTE], "AAA", "2027-02-17", "2027-02-23",
+                            today="2026-10-15")
+    assert q["stale"] is True
+    assert compose.match_quote([QUOTE], "AAA", "2027-02-17", "2027-02-23",
+                               today="2027-04-01") is None
+
+
+def test_quote_prefers_freshest():
+    older = {**QUOTE, "per_night": 999999, "quoted_at": "2026-07-01"}
+    q = compose.match_quote([older, QUOTE], "AAA", "2027-02-17", "2027-02-23",
+                            today=TODAY)
+    assert q["per_night"] == 150000
+
+
+def test_quote_requires_quoted_at_and_krw():
+    """나이를 모르는 값과 통화가 섞인 값은 실측이라 부를 수 없다."""
+    no_date = {k: v for k, v in QUOTE.items() if k != "quoted_at"}
+    usd = {**QUOTE, "currency": "USD"}
+    for bad in (no_date, usd):
+        assert compose.match_quote([bad], "AAA", "2027-02-17", "2027-02-23",
+                                   today=TODAY) is None
+
+
+def test_build_uses_quote_as_measured_with_narrow_band():
+    flights = {"AAA": _flight("AAA", 1000000)}
+    r = compose.build(["AAA"], PROFILES, flights, {}, 2, 1, 6,
+                      quotes=[QUOTE], today=TODAY)
+    lodging = [i for i in r["rows"][0]["budget"]["items"] if i["label"] == "숙박"][0]
+    assert lodging["source"] == compose.MEASURED
+    assert lodging["amount"] == 900000                    # 150,000 × 6박
+    assert lodging["high"] - lodging["low"] == 180000     # ±10% — 어림값(±40%)보다 좁다
+    assert "2026-08-10 확인" in lodging["note"]
+
+
+def test_read_lodging_quotes_filters_party(tmp_path):
+    p = tmp_path / "q.json"
+    p.write_text(json.dumps({"quotes": [QUOTE, {**QUOTE, "children": 0}]},
+                            ensure_ascii=False), encoding="utf-8")
+    assert len(compose.read_lodging_quotes(str(p), adults=2, children=1)) == 1
+    assert compose.read_lodging_quotes(str(tmp_path / "없음.json")) == []
+
+
+def test_markdown_warns_when_tiers_overlap():
+    from brief import main as bmain
+    flights = {"AAA": _flight("AAA", 1000000), "BBB": _flight("BBB", 900000)}
+    result = compose.build(["AAA", "BBB"], PROFILES, flights, {}, 2, 1, 6)
+    md = bmain.to_markdown(result,
+                           {"nights": 6, "adults": 2, "children": 1, "built_at": "t"},
+                           compose.recommend(result["rows"], "balanced"))
+    assert "순위를 확정할 수 없다" in md
+    assert "~" in md   # 범위 열

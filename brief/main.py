@@ -83,14 +83,15 @@ def to_markdown(result, meta, recommendation):
     lines += [
         "## 후보 비교",
         "",
-        "| 목적지 | 총예산 | 1인 | 항공권 | 숙박 | 현지비 | 비행 | 아이 |",
-        "|--------|--------|-----|--------|------|--------|------|------|",
+        "| 목적지 | 총예산 | 범위 | 1인 | 항공권 | 숙박 | 현지비 | 비행 | 아이 |",
+        "|--------|--------|------|-----|--------|------|--------|------|------|",
     ]
     for r in result["rows"]:
         b = {i["label"]: i for i in r["budget"]["items"]}
         stay_mark = "" if r["stay"] else "*"
         lines.append(
-            f"| {r['name']} | **{_won(b['총예산']['amount']) if '총예산' in b else _won(r['budget']['total'])}** "
+            f"| {r['name']} | **{_won(r['budget']['total'])}** "
+            f"| {_won(r['budget']['total_low'])}~{_won(r['budget']['total_high'])} "
             f"| {_won(r['budget']['per_person'])} "
             f"| {_won(b['항공권']['amount'])} "
             f"| {_won(b['숙박']['amount'])}{stay_mark} "
@@ -103,6 +104,10 @@ def to_markdown(result, meta, recommendation):
         "> `*` 표시는 숙박 실측이 없어 어림값을 쓴 경우다. 현지비는 항상 추정치다.",
         "",
     ]
+    if result["rows"] and result["rows"][0].get("tier_peers"):
+        n = result["rows"][0]["tier_peers"] + 1
+        lines += [f"> ⚠️ 상위 {n}곳은 추정 오차 범위가 겹쳐 **총액 순위를 확정할 수 없다**. "
+                  "숙박 견적(`python -m brief.quote`)을 넣으면 범위가 좁혀진다.", ""]
 
     lines += ["## 목적지별 상세", ""]
     for r in result["rows"]:
@@ -147,6 +152,7 @@ def run(argv=None):
     profiles = compose.load_profiles()
     flights = compose.read_flight_scans(adults=a.adults, children=a.children)
     stays = compose.read_stay_scans()
+    quotes = compose.read_lodging_quotes(adults=a.adults, children=a.children)
 
     if a.candidates:
         candidates = [c.strip().upper() for c in a.candidates.split(",") if c.strip()]
@@ -156,10 +162,10 @@ def run(argv=None):
         raise SystemExit("비교할 후보가 없습니다. 먼저 항공권 스캔을 돌리세요.")
 
     print(f"▶ 후보 {len(candidates)}곳 | 항공권 실측 {len(flights)}곳 "
-          f"| 숙박 실측 {len(stays)}곳")
+          f"| 숙박 스캔 {len(stays)}곳 | 직접 견적 {len(quotes)}건")
 
     result = compose.build(candidates, profiles, flights, stays,
-                           a.adults, a.children, a.nights)
+                           a.adults, a.children, a.nights, quotes=quotes)
     rec = compose.recommend(result["rows"], a.prefer)
 
     meta = {
