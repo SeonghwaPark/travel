@@ -1,0 +1,4 @@
+# 숙박 가격 조회 전용 — 헤드리스 브라우저가 필요하다.
+# Google 호텔은 가격을 렌더링 후에 채우므로 HTTP 요청만으로는 못 읽는다.
+-r requirements-watch.txt
+playwright
