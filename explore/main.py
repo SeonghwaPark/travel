@@ -154,7 +154,11 @@ def run(argv=None):
         "failed": sorted(failed),
     }
 
-    tag = a.tag or f"{a.origin.upper()}-{start_s}-{end_s}"
+    # 같은 기간을 박수·인원만 바꿔 돌리는 일이 잦다. 조건을 파일명에 넣지 않으면
+    # 뒤 실행이 앞 결과를 조용히 덮어쓴다.
+    nsig = "-".join(str(n) for n in nights_list) + "n"
+    psig = f"{a.adults}a{a.children}c{a.infants}i"
+    tag = a.tag or f"{a.origin.upper()}-{start_s}-{end_s}-{nsig}-{psig}"
     os.makedirs(RESULTS_DIR, exist_ok=True)
     jpath = os.path.join(RESULTS_DIR, f"{tag}.json")
     mpath = os.path.join(RESULTS_DIR, f"{tag}.md")

@@ -190,3 +190,15 @@ def test_run_rejects_empty_destination_set(stub_graph):
     with pytest.raises(SystemExit):
         explore_main.run(["--start", "2027-02-01", "--end", "2027-02-10",
                           "--only", "NOPE"])
+
+
+def test_default_tag_includes_nights_and_pax(stub_graph, monkeypatch):
+    """같은 기간을 조건만 바꿔 돌릴 때 앞 결과를 덮어쓰지 않아야 한다."""
+    _calls, tmp_path = stub_graph
+    common = ["--start", "2027-02-01", "--end", "2027-02-28", "--only", "FUK"]
+    explore_main.run(common + ["--nights", "5,6", "--adults", "2", "--children", "1"])
+    explore_main.run(common + ["--nights", "3", "--adults", "1"])
+
+    names = sorted(p.name for p in tmp_path.glob("*.json"))
+    assert names == ["ICN-2027-02-01-2027-02-28-3n-1a0c0i.json",
+                     "ICN-2027-02-01-2027-02-28-5-6n-2a1c0i.json"], names
