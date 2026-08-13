@@ -1,0 +1,91 @@
+name: lodging-scan
+
+# 숙박 구역별 가격 + 구역 가이드를 함께 낸다.
+# 가격 조회가 실패해도 가이드는 그대로 커밋되므로 결과가 빈손이 되지 않는다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dest:
+        description: "목적지 코드 (CTS, HKD, NBR, NRT, HKG, TPE, FUK, KIX)"
+        type: string
+        required: true
+        default: "CTS"
+      check_in:
+        description: "체크인 (YYYY-MM-DD)"
+        type: string
+        required: true
+      check_out:
+        description: "체크아웃 (YYYY-MM-DD)"
+        type: string
+        required: true
+      adults:
+        description: "성인 수"
+        type: string
+        default: "2"
+      children:
+        description: "아동 수"
+        type: string
+        default: "0"
+      no_prices:
+        description: "가격 조회 없이 가이드만"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lodging-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements-browser.txt
+
+      - name: Install Chromium
+        if: ${{ inputs.no_prices != true }}
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run lodging scan
+        env:
+          IN_DEST: ${{ inputs.dest }}
+          IN_CHECKIN: ${{ inputs.check_in }}
+          IN_CHECKOUT: ${{ inputs.check_out }}
+          IN_ADULTS: ${{ inputs.adults }}
+          IN_CHILDREN: ${{ inputs.children }}
+          IN_NOPRICES: ${{ inputs.no_prices }}
+        run: |
+          ARGS=(--dest "$IN_DEST" --check-in "$IN_CHECKIN" --check-out "$IN_CHECKOUT"
+                --adults "$IN_ADULTS" --children "$IN_CHILDREN")
+          if [ "$IN_NOPRICES" = "true" ]; then ARGS+=(--no-prices); fi
+          python -m explore.stay "${ARGS[@]}"
+
+      - name: Commit results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add explore/results/
+          if git diff --staged --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "chore: 숙박 구역 조회 결과 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+            git pull --rebase --autostash origin ${{ github.ref_name }}
+            git push
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          FILE=$(ls -t explore/results/stay-*.md 2>/dev/null | head -1)
+          if [ -n "$FILE" ]; then cat "$FILE" >> $GITHUB_STEP_SUMMARY;
+          else echo "결과 파일 없음" >> $GITHUB_STEP_SUMMARY; fi
