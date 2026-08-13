@@ -18,13 +18,13 @@
       "id": "sapporo-feb2027",
       "label": "삿포로 2027년 2월 가족여행",
       "dest": "CTS",
-      "date_from": "2027-02-13",
+      "date_from": "2027-02-08",
       "date_to": "2027-02-28",
-      "nights": [5, 6],
+      "nights": [6],
       "adults": 2,
       "children": 1,
       "alert": {
-        "target_price": 1600000,
+        "target_price": 1400000,
         "drop_pct": 7
       }
     },
