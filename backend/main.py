@@ -26,6 +26,9 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if os.getenv("OPENAI
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY")) if os.getenv("GROQ_API_KEY") else None
 
 # 스크래핑 코어는 gflights로 분리 — 감시 봇(watch/)도 같은 코드를 쓴다
+import lodging
+import transport
+
 from gflights import (
     MAX_RANGE_DAYS,
     fetch_price_graph,
@@ -89,6 +92,15 @@ class HotelSearchRequest(BaseModel):
     check_in: str
     check_out: str
     adults: int = 1
+    children: int = 0
+    child_ages: list[int] | None = None
+    rooms: int | None = None
+
+
+class TransportPlanRequest(BaseModel):
+    region: str = "hokkaido"
+    legs: list[str]
+    trip_days: int | None = None
 
 
 class ActivitySearchRequest(BaseModel):
@@ -650,51 +662,58 @@ async def price_graph_health():
 
 @app.post("/api/hotels/search")
 def search_hotels(req: HotelSearchRequest):
-    dest_info = POPULAR_DESTINATIONS.get(req.destination)
+    """예약처별 검색 링크. 가격은 긁지 않는다 (약관·봇차단 문제).
+
+    인원·객실·아동 나이까지 채워서 보낸다 — 이게 빠지면 3인 가족이 열어도
+    2인 기준 결과가 떠서 링크가 사실상 쓸모없어진다.
+    """
+    dest_info = {**POPULAR_DESTINATIONS, **DOMESTIC_DESTINATIONS}.get(req.destination)
     if not dest_info:
         raise HTTPException(status_code=400, detail="지원하지 않는 목적지입니다")
 
-    dest_name = dest_info["name"].split()[0]
-    hotels = [
-        {
-            "name": f"{dest_name} 호텔 검색 (네이버 호텔)",
-            "hotel_id": "naver",
-            "rating": None,
-            "price": {"total": "0", "currency": ""},
-            "room_type": "",
-            "bed_type": "",
-            "description": f"{dest_info['country']} {dest_name} 지역 호텔 가격 비교",
-            "check_in": req.check_in,
-            "check_out": req.check_out,
-            "booking_link": f"https://hotel.naver.com/hotels/search?destination={quote(dest_name)}&checkin={req.check_in}&checkout={req.check_out}",
-        },
-        {
-            "name": f"{dest_name} 호텔 검색 (Booking.com)",
-            "hotel_id": "booking",
-            "rating": None,
-            "price": {"total": "0", "currency": ""},
-            "room_type": "",
-            "bed_type": "",
-            "description": f"전 세계 최대 호텔 예약 사이트에서 {dest_name} 숙소 검색",
-            "check_in": req.check_in,
-            "check_out": req.check_out,
-            "booking_link": f"https://www.booking.com/searchresults.ko.html?ss={quote(dest_name)}&checkin={req.check_in}&checkout={req.check_out}",
-        },
-        {
-            "name": f"{dest_name} 호텔 검색 (Agoda)",
-            "hotel_id": "agoda",
-            "rating": None,
-            "price": {"total": "0", "currency": ""},
-            "room_type": "",
-            "bed_type": "",
-            "description": f"아시아 특화 호텔 예약, {dest_name} 최저가 검색",
-            "check_in": req.check_in,
-            "check_out": req.check_out,
-            "booking_link": f"https://www.agoda.com/ko-kr/search?city={quote(dest_name)}&checkIn={req.check_in}&checkOut={req.check_out}",
-        },
-    ]
+    place = dest_info["name"].split()[0]
+    result = lodging.search_links(
+        place, req.check_in, req.check_out,
+        adults=req.adults, children=req.children,
+        child_ages=req.child_ages, rooms=req.rooms,
+    )
+    result["destination_code"] = req.destination
+    result["destination_name"] = dest_info["name"]
+    result["country"] = dest_info.get("country", "")
+    result["count"] = len(result["links"])
+    result["note"] = (
+        "가격은 각 사이트에서 확인하세요. 인원·객실 조건은 링크에 이미 반영돼 있습니다."
+    )
+    return result
 
-    return {"count": len(hotels), "hotels": hotels}
+
+# ── Transport (구간 요금·패스 손익) ──
+
+@app.get("/api/transport/regions")
+def get_transport_regions():
+    data = transport.load()
+    return {
+        "regions": [
+            {
+                "id": rid,
+                "name": r["name"],
+                "currency": r.get("currency"),
+                "legs": [{"id": lid, **leg} for lid, leg in r["legs"].items()],
+                "passes": r.get("passes", []),
+                "fares_verified": r.get("fares_verified", False),
+            }
+            for rid, r in data["regions"].items()
+        ]
+    }
+
+
+@app.post("/api/transport/plan")
+def plan_transport(req: TransportPlanRequest):
+    """구간 목록으로 개별권 합계와 패스 손익을 계산한다."""
+    try:
+        return transport.plan(req.region, req.legs, req.trip_days)
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # ── Activities (외부 링크) ──

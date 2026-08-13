@@ -1,0 +1,49 @@
+name: hotel-probe
+
+# Google 호텔 가격을 긁을 수 있는지 판별하는 일회성 진단.
+# 로컬(사내망 등)에서 google.com이 막혀 있어도 여기서는 확인할 수 있다.
+# 판별이 끝나면 이 워크플로와 backend/_probe_hotels.py는 지워도 된다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      place:
+        description: "지역명 (예: 삿포로)"
+        type: string
+        default: "삿포로"
+      check_in:
+        description: "체크인 (YYYY-MM-DD)"
+        type: string
+        default: "2027-02-17"
+      check_out:
+        description: "체크아웃 (YYYY-MM-DD)"
+        type: string
+        default: "2027-02-23"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements-watch.txt
+
+      - name: Probe Google Hotels
+        env:
+          IN_PLACE: ${{ inputs.place }}
+          IN_CHECKIN: ${{ inputs.check_in }}
+          IN_CHECKOUT: ${{ inputs.check_out }}
+        run: |
+          {
+            echo '```'
+            python backend/_probe_hotels.py "$IN_PLACE" "$IN_CHECKIN" "$IN_CHECKOUT" 2>&1 || true
+            echo '```'
+          } | tee -a $GITHUB_STEP_SUMMARY
