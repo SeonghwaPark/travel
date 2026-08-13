@@ -202,3 +202,100 @@ def test_shipped_profiles_are_complete():
         assert not missing, f"{code}에 없는 항목: {missing}"
         assert 1 <= d["family"]["score"] <= 5, code
         assert d["daily_cost"] > 0 and d["lodging_per_night"] > 0, code
+
+
+# ── 계절·이벤트 배수 ──
+
+PROFILE_M = {
+    "name": "테스트", "daily_cost": 50000, "flight_hours": 2.0,
+    "lodging_per_night": 100000, "lodging_confidence": "low",
+    "family": {"score": 3, "why": ""}, "highlights": [],
+    "season_multipliers": [
+        {"from": "02-04", "to": "02-12", "factor": 1.9, "reason": "축제",
+         "confidence": "medium", "lunar": False},
+        {"from": "12-28", "to": "01-03", "factor": 1.5, "reason": "연말연시",
+         "confidence": "medium", "lunar": False},
+    ],
+}
+
+
+def test_season_multiplier_hits_event_window():
+    assert compose.season_multiplier(PROFILE_M, "2027-02-10")["factor"] == 1.9
+    assert compose.season_multiplier(PROFILE_M, "2027-02-10")["reason"] == "축제"
+
+
+def test_season_multiplier_outside_window_is_one():
+    assert compose.season_multiplier(PROFILE_M, "2027-02-17")["factor"] == 1.0
+
+
+def test_season_multiplier_wraps_year_end():
+    """연말연시처럼 해를 넘기는 구간도 잡아야 한다."""
+    assert compose.season_multiplier(PROFILE_M, "2026-12-30")["factor"] == 1.5
+    assert compose.season_multiplier(PROFILE_M, "2027-01-02")["factor"] == 1.5
+    assert compose.season_multiplier(PROFILE_M, "2027-01-10")["factor"] == 1.0
+
+
+def test_season_multiplier_handles_bad_date():
+    for bad in (None, "", "2027", 20270210):
+        assert compose.season_multiplier(PROFILE_M, bad)["factor"] == 1.0
+
+
+def test_budget_applies_event_multiplier():
+    plain = compose.estimate_budget(PROFILE_M, 6, 2, 1, 0, check_in="2027-02-17")
+    peak = compose.estimate_budget(PROFILE_M, 6, 2, 1, 0, check_in="2027-02-10")
+    lodging = lambda b: [i for i in b["items"] if i["label"] == "숙박"][0]
+    assert lodging(plain)["amount"] == 600000
+    assert lodging(peak)["amount"] == 1140000        # 100,000 × 1.9 × 6박
+    assert "축제" in lodging(peak)["note"]
+
+
+def test_measured_lodging_ignores_multiplier():
+    """실측이 있으면 배수를 또 곱하면 안 된다 — 실측에 이미 반영돼 있다."""
+    b = compose.estimate_budget(PROFILE_M, 6, 2, 1, 0, check_in="2027-02-10",
+                                stay={"per_night": 150000, "area": "역앞"})
+    lodging = [i for i in b["items"] if i["label"] == "숙박"][0]
+    assert lodging["amount"] == 900000
+    assert lodging["confidence"] == "high"
+
+
+def test_measured_items_have_no_error_band():
+    b = compose.estimate_budget(PROFILE_M, 6, 2, 1, 1000000)
+    flight = [i for i in b["items"] if i["label"] == "항공권"][0]
+    assert flight["low"] == flight["high"] == flight["amount"]
+
+
+def test_estimated_items_carry_band():
+    b = compose.estimate_budget(PROFILE_M, 6, 2, 1, 1000000)
+    lodging = [i for i in b["items"] if i["label"] == "숙박"][0]
+    assert lodging["low"] < lodging["amount"] < lodging["high"]
+    assert b["total_low"] < b["total"] < b["total_high"]
+
+
+# ── 구분 가능성 ──
+
+def _row(name, total, low, high):
+    return {"name": name, "budget": {"total": total, "total_low": low,
+                                     "total_high": high}}
+
+
+def test_overlapping_candidates_share_a_tier():
+    """범위가 겹치면 순위를 말할 수 없다."""
+    rows = [_row("A", 100, 80, 130), _row("B", 120, 95, 150)]
+    compose.mark_separability(rows)
+    assert rows[0]["tier"] == rows[1]["tier"] == 0
+    assert rows[0]["tier_peers"] == 1
+
+
+def test_separated_candidates_get_different_tiers():
+    rows = [_row("A", 100, 90, 110), _row("B", 500, 450, 550)]
+    compose.mark_separability(rows)
+    assert rows[0]["tier"] != rows[1]["tier"]
+    assert rows[0]["tier_peers"] == 0
+
+
+def test_tiers_chain_transitively():
+    """A~B가 겹치고 B~C가 겹치면 셋 다 한 그룹이다."""
+    rows = [_row("A", 100, 80, 130), _row("B", 140, 120, 170),
+            _row("C", 180, 160, 210), _row("D", 900, 880, 920)]
+    compose.mark_separability(rows)
+    assert [r["tier"] for r in rows] == [0, 0, 0, 1]

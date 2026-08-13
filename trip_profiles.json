@@ -57,7 +57,26 @@
           "kid": true
         }
       ],
-      "lodging_per_night": 170000
+      "lodging_per_night": 170000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "02-04",
+          "to": "02-12",
+          "factor": 1.9,
+          "reason": "삿포로 눈축제",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "medium",
+          "lunar": false
+        }
+      ]
     },
     "HKD": {
       "name": "하코다테",
@@ -96,7 +115,18 @@
           "kid": true
         }
       ],
-      "lodging_per_night": 150000
+      "lodging_per_night": 150000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.4,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
     },
     "TPE": {
       "name": "타이베이",
@@ -145,7 +175,18 @@
           "kid": false
         }
       ],
-      "lodging_per_night": 130000
+      "lodging_per_night": 130000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "01-25",
+          "to": "02-18",
+          "factor": 1.6,
+          "reason": "춘절",
+          "confidence": "low",
+          "lunar": true
+        }
+      ]
     },
     "KHH": {
       "name": "가오슝",
@@ -180,7 +221,18 @@
           "kid": false
         }
       ],
-      "lodging_per_night": 110000
+      "lodging_per_night": 110000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "01-25",
+          "to": "02-18",
+          "factor": 1.5,
+          "reason": "춘절",
+          "confidence": "low",
+          "lunar": true
+        }
+      ]
     },
     "HKG": {
       "name": "홍콩",
@@ -220,7 +272,26 @@
           "kid": false
         }
       ],
-      "lodging_per_night": 250000
+      "lodging_per_night": 250000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "01-25",
+          "to": "02-18",
+          "factor": 1.7,
+          "reason": "춘절",
+          "confidence": "low",
+          "lunar": true
+        },
+        {
+          "from": "12-24",
+          "to": "01-02",
+          "factor": 1.4,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
     },
     "NRT": {
       "name": "도쿄",
@@ -259,7 +330,34 @@
           "kid": true
         }
       ],
-      "lodging_per_night": 200000
+      "lodging_per_night": 200000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "03-25",
+          "to": "04-10",
+          "factor": 1.5,
+          "reason": "벚꽃",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "04-29",
+          "to": "05-05",
+          "factor": 1.7,
+          "reason": "골든위크",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "medium",
+          "lunar": false
+        }
+      ]
     },
     "KIX": {
       "name": "오사카",
@@ -298,7 +396,34 @@
           "kid": false
         }
       ],
-      "lodging_per_night": 180000
+      "lodging_per_night": 180000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "03-25",
+          "to": "04-10",
+          "factor": 1.5,
+          "reason": "벚꽃",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "04-29",
+          "to": "05-05",
+          "factor": 1.7,
+          "reason": "골든위크",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "medium",
+          "lunar": false
+        }
+      ]
     },
     "FUK": {
       "name": "후쿠오카",
@@ -332,7 +457,26 @@
           "kid": false
         }
       ],
-      "lodging_per_night": 160000
+      "lodging_per_night": 160000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "04-29",
+          "to": "05-05",
+          "factor": 1.5,
+          "reason": "골든위크",
+          "confidence": "low",
+          "lunar": false
+        },
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.4,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
     },
     "OKA": {
       "name": "오키나와",
@@ -367,7 +511,26 @@
           "kid": false
         }
       ],
-      "lodging_per_night": 170000
+      "lodging_per_night": 170000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "04-29",
+          "to": "05-05",
+          "factor": 1.6,
+          "reason": "골든위크",
+          "confidence": "low",
+          "lunar": false
+        },
+        {
+          "from": "07-15",
+          "to": "08-25",
+          "factor": 1.7,
+          "reason": "여름 성수기",
+          "confidence": "medium",
+          "lunar": false
+        }
+      ]
     },
     "CEB": {
       "name": "세부",
@@ -396,7 +559,18 @@
           "kid": true
         }
       ],
-      "lodging_per_night": 160000
+      "lodging_per_night": 160000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-24",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
     },
     "GUM": {
       "name": "괌",
@@ -425,8 +599,26 @@
           "kid": true
         }
       ],
-      "lodging_per_night": 280000
+      "lodging_per_night": 280000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-24",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
     }
   },
-  "_lodging_note": "lodging_per_night은 3인 1실 중급 숙소 1박 어림값(KRW)이다. 숙박 스캔 실측이 있으면 브리프가 그걸 우선 쓰고, 없을 때만 이 값을 쓴다."
+  "_lodging_note": "lodging_per_night은 3인 1실 중급 숙소 1박 어림값(KRW)이다. 숙박 스캔 실측이 있으면 브리프가 그걸 우선 쓰고, 없을 때만 이 값을 쓴다.",
+  "_multiplier_note": "season_multipliers는 숙박비가 뛰는 구간이다. from/to는 MM-DD이며 매년 반복된다. lunar:true는 음력 기준이라 해마다 날짜가 옮겨간다 — 창을 넓게 잡았고 신뢰도가 낮다.",
+  "_confidence_note": "low = 어림값, ±40%로 본다. medium = 근거 있는 추정, ±25%. high = 실측 기록 있음, ±10%. 브리프가 이 폭을 범위로 표시한다.",
+  "confidence_bands": {
+    "low": 0.4,
+    "medium": 0.25,
+    "high": 0.1
+  }
 }

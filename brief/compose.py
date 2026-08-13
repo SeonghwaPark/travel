@@ -94,15 +94,27 @@ def read_stay_scans(results_dir=None):
 # ── 합산 ──
 
 def estimate_budget(profile, nights, adults, children, flight_total,
-                    stay=None, transport_total=0, child_ratio=0.6):
-    """한 목적지의 총예산. 각 항목에 출처(실측/추정)를 붙인다."""
+                    stay=None, transport_total=0, child_ratio=0.6,
+                    check_in=None, bands=None):
+    """한 목적지의 총예산. 각 항목에 출처(실측/추정)와 오차 폭을 붙인다."""
+    bands = bands or {"low": 0.40, "medium": 0.25, "high": 0.10}
     days = nights + 1
     heads = adults + children * child_ratio
 
+    season = season_multiplier(profile, check_in) if check_in else {
+        "factor": 1.0, "reason": None, "confidence": None, "lunar": False}
+
     if stay:
         per_night, stay_src = stay["per_night"], MEASURED
+        stay_conf, season = "high", {"factor": 1.0, "reason": None,
+                                     "confidence": None, "lunar": False}
     else:
         per_night, stay_src = profile["lodging_per_night"], ESTIMATED
+        stay_conf = profile.get("lodging_confidence", "low")
+        # 이벤트 배수의 신뢰도가 더 낮으면 그쪽을 따른다
+        if season["confidence"] == "low" and stay_conf != "low":
+            stay_conf = "low"
+    per_night = round(per_night * season["factor"])
     lodging = per_night * nights
 
     daily = round(profile["daily_cost"] * heads) * days
@@ -111,24 +123,66 @@ def estimate_budget(profile, nights, adults, children, flight_total,
         {"label": "항공권", "amount": flight_total, "source": MEASURED,
          "note": f"{adults}성인+{children}소아 왕복 합계"},
         {"label": "숙박", "amount": lodging, "source": stay_src,
+         "confidence": stay_conf,
          "note": f"1박 {per_night:,}원 × {nights}박"
-                 + (f" ({stay['area']})" if stay else " (3인 1실 중급 어림)")},
+                 + (f" ({stay['area']})" if stay
+                    else f" (3인 1실 어림"
+                         + (f" × {season['factor']} {season['reason']}"
+                            if season["reason"] else "") + ")")},
         {"label": "현지비", "amount": daily, "source": ESTIMATED,
+         "confidence": profile.get("daily_cost_confidence", "low"),
          "note": f"1인 1일 {profile['daily_cost']:,}원 × {days}일 (아동 {child_ratio}배)"},
     ]
     if transport_total:
         items.append({"label": "교통(구간·패스)", "amount": transport_total,
                       "source": ESTIMATED, "note": "지역 내 이동"})
 
+    for i in items:
+        i.setdefault("confidence", "high" if i["source"] == MEASURED else "low")
+        band = 0.0 if i["source"] == MEASURED else bands.get(i["confidence"], 0.40)
+        i["low"] = round(i["amount"] * (1 - band))
+        i["high"] = round(i["amount"] * (1 + band))
+
     total = sum(i["amount"] for i in items)
     return {
         "total": total,
+        "total_low": sum(i["low"] for i in items),
+        "total_high": sum(i["high"] for i in items),
+        "season": season,
         "per_person": round(total / max(1, adults + children)),
         "items": items,
         "measured_ratio": round(
             sum(i["amount"] for i in items if i["source"] == MEASURED) / total, 2)
         if total else 0.0,
     }
+
+
+def _in_window(md, start, end):
+    """MM-DD가 구간에 드는가. 연말연시처럼 해를 넘기는 구간도 처리한다."""
+    if start <= end:
+        return start <= md <= end
+    return md >= start or md <= end
+
+
+def season_multiplier(profile, date_str):
+    """그 날짜에 걸리는 숙박 배수. 없으면 factor 1.0.
+
+    이벤트 주간에 숙박비가 뛰는 걸 반영한다. 목적지당 숫자 하나로 두면
+    삿포로 눈축제 주간과 2월 하순이 같은 값이 되는데, 실제로는 두 배 가까이
+    벌어진다 — 총액에서 가장 큰 오차원이다.
+    """
+    try:
+        md = date_str[5:10]
+        assert len(md) == 5
+    except (TypeError, IndexError, AssertionError):
+        return {"factor": 1.0, "reason": None, "confidence": None, "lunar": False}
+
+    for w in profile.get("season_multipliers", []):
+        if _in_window(md, w["from"], w["to"]):
+            return {"factor": w["factor"], "reason": w["reason"],
+                    "confidence": w.get("confidence", "low"),
+                    "lunar": w.get("lunar", False)}
+    return {"factor": 1.0, "reason": None, "confidence": None, "lunar": False}
 
 
 def _month_of(date_str):
@@ -164,7 +218,8 @@ def build(candidates, profiles, flights, stays, adults, children,
         budget = estimate_budget(
             profile, nights, adults, children, flight["best_price"],
             stay=stays.get(code), transport_total=transport_costs.get(code, 0),
-            child_ratio=child_ratio)
+            child_ratio=child_ratio, check_in=flight.get("departure_date"),
+            bands=profiles.get("confidence_bands"))
 
         month = _month_of(flight.get("departure_date"))
         in_season = month in profile.get("best_months", []) if month else None
@@ -184,7 +239,32 @@ def build(candidates, profiles, flights, stays, adults, children,
         })
 
     rows.sort(key=lambda r: r["budget"]["total"])
+    mark_separability(rows)
     return {"rows": rows, "skipped": skipped}
+
+
+def mark_separability(rows):
+    """오차 범위가 겹치는 후보끼리 묶는다.
+
+    추정치가 섞인 합계로 순위를 매기면, 범위가 겹치는데도 표에서는 1위·2위로
+    갈린 것처럼 보인다. 겹치면 '구분 안 됨'이라고 말해야 한다 — 그렇지 않으면
+    추정치가 실제보다 많은 걸 결정하게 된다.
+    """
+    group = 0
+    for i, r in enumerate(rows):
+        if i == 0:
+            r["tier"] = 0
+            continue
+        prev = rows[i - 1]
+        # 앞 후보의 상한이 이 후보의 하한보다 크면 둘은 구분되지 않는다
+        if prev["budget"]["total_high"] >= r["budget"]["total_low"]:
+            r["tier"] = prev["tier"]
+        else:
+            group = prev["tier"] + 1
+            r["tier"] = group
+    for r in rows:
+        r["tier_peers"] = sum(1 for x in rows if x["tier"] == r["tier"]) - 1
+    return rows
 
 
 def recommend(rows, prefer="balanced"):
