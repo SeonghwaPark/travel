@@ -143,6 +143,42 @@ python scan_cheapest.py --dest CTS --start 2027-02-01 --end 2027-02-28 \
 
 ---
 
+## 🧭 최저가 탐색 (여러 목적지 × 기간)
+
+**"2월에 어디가 제일 싸?"**에 답한다. 목적지 여럿을 기간 전체에 걸쳐 훑어 순위를 낸다.
+가격 그래프를 쓰므로 목적지·박수당 요청 1번이면 된다.
+
+```bash
+python -m explore.main --start 2027-02-01 --end 2027-02-28 --nights 4,5 --adults 2
+python -m explore.main --start 2027-02-01 --end 2027-02-28 --only NRT,KIX,FUK,TPE
+```
+
+결과는 `explore/results/` 아래 JSON + Markdown 표로 남는다.
+
+| 옵션 | 설명 |
+|------|------|
+| `--nights` | 비교할 박수 (`4,5`) |
+| `--scope` | `international` / `domestic` / `all` |
+| `--only` | 특정 목적지 코드만 (`NRT,KIX,FUK`) |
+| `--limit` | 목적지 수 상한 (0=전체) |
+
+**GitHub Actions에서 실행** — `.github/workflows/explore-fares.yml`의 **Run workflow** 버튼으로
+기간·박수·인원을 넣고 돌리면 된다. 결과는 리포지토리에 커밋되고 실행 요약에도 표로 뜬다.
+
+> 💡 **사내망처럼 Google이 막힌 환경에서 특히 쓸모 있다.** 로컬에서 `tunnel error`가 나도
+> Actions는 GitHub 서버에서 돌기 때문에 조회가 된다. PC에 아무것도 깔 필요가 없다.
+
+세 스캐너의 역할 구분:
+
+| | 목적지 | 날짜 | 쓰임 |
+|---|---|---|---|
+| 최저가 목적지 (웹 탭) | 여러 개 | 하루 고정 | 날짜가 정해졌을 때 |
+| 최저가 날짜 (웹 탭) | 하나 | 기간 전체 | 목적지가 정해졌을 때 |
+| **최저가 탐색** (`explore/`) | **여러 개** | **기간 전체** | **둘 다 미정일 때** |
+| 날짜 범위 스캐너 (`scan_cheapest.py`) | 하나 | 기간 전체 | 확정 전 정밀 비교 (항공사·시간까지) |
+
+---
+
 ## 🔔 특가 감시 봇
 
 `watchlist.json`에 노선을 등록해두면 정기적으로 훑어 **특가일 때만** 텔레그램으로 알린다.

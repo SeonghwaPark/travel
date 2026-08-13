@@ -1,0 +1,110 @@
+name: explore-fares
+
+# "2월에 어디가 제일 싸?" 같은 질문에 답하기 위한 수동 실행 워크플로.
+# 로컬(사내망 등)에서 Google 접속이 막혀 있어도 여기서는 되므로, 결과를
+# 리포지토리에 커밋해두고 읽는다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "가장 빠른 출발일 (YYYY-MM-DD)"
+        type: string
+        required: true
+      end:
+        description: "가장 늦은 출발일 (YYYY-MM-DD, 시작일로부터 최대 161일)"
+        type: string
+        required: true
+      nights:
+        description: "비교할 박수 (쉼표 구분, 예: 4,5)"
+        type: string
+        default: "4,5"
+      adults:
+        description: "성인 수"
+        type: string
+        default: "1"
+      children:
+        description: "소아 수"
+        type: string
+        default: "0"
+      infants:
+        description: "유아 수 (무릎)"
+        type: string
+        default: "0"
+      scope:
+        description: "조회 범위"
+        type: choice
+        options: [international, domestic, all]
+        default: international
+      only:
+        description: "특정 목적지 코드만 (쉼표 구분, 비우면 전체)"
+        type: string
+        default: ""
+      limit:
+        description: "목적지 수 상한 (0=전체)"
+        type: string
+        default: "0"
+
+# 결과를 리포지토리에 커밋해야 나중에 읽을 수 있다
+permissions:
+  contents: write
+
+concurrency:
+  group: explore-fares
+  cancel-in-progress: false
+
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements-watch.txt
+
+      - name: Run explore scan
+        # 입력값은 env로 넘긴다 — run 스크립트에 직접 넣으면 셸에 그대로 섞인다
+        env:
+          IN_START: ${{ inputs.start }}
+          IN_END: ${{ inputs.end }}
+          IN_NIGHTS: ${{ inputs.nights }}
+          IN_ADULTS: ${{ inputs.adults }}
+          IN_CHILDREN: ${{ inputs.children }}
+          IN_INFANTS: ${{ inputs.infants }}
+          IN_SCOPE: ${{ inputs.scope }}
+          IN_ONLY: ${{ inputs.only }}
+          IN_LIMIT: ${{ inputs.limit }}
+        run: |
+          ARGS=(--start "$IN_START" --end "$IN_END" --nights "$IN_NIGHTS"
+                --adults "$IN_ADULTS" --children "$IN_CHILDREN" --infants "$IN_INFANTS"
+                --scope "$IN_SCOPE" --limit "$IN_LIMIT")
+          if [ -n "$IN_ONLY" ]; then ARGS+=(--only "$IN_ONLY"); fi
+          python -m explore.main "${ARGS[@]}"
+
+      - name: Commit results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add explore/results/
+          if git diff --staged --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "chore: 최저가 탐색 결과 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+            # 감시 봇이 같은 시각에 이력을 커밋할 수 있어 리베이스 후 재시도
+            git pull --rebase --autostash origin ${{ github.ref_name }}
+            git push
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          FILE=$(ls -t explore/results/*.md 2>/dev/null | head -1)
+          if [ -n "$FILE" ]; then
+            cat "$FILE" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "결과 파일이 없습니다." >> $GITHUB_STEP_SUMMARY
+          fi

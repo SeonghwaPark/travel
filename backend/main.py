@@ -134,56 +134,16 @@ try:
 except (OSError, json.JSONDecodeError):
     AIRLINE_DEALS = []
 
-KOREAN_AIRPORTS = {
-    "ICN": "인천국제공항",
-    "GMP": "김포국제공항",
-    "PUS": "김해국제공항",
-    "CJU": "제주국제공항",
-    "TAE": "대구국제공항",
-}
+# 목적지 목록은 리포 루트 destinations.json에서 읽는다 — 탐색 스캐너(explore/)가
+# FastAPI 없이 같은 목록을 써야 하므로. airlines.json과 같은 방식.
+_DESTINATIONS_JSON = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "destinations.json")
+with open(_DESTINATIONS_JSON, encoding="utf-8") as _f:
+    _DESTINATIONS = json.load(_f)
 
-DOMESTIC_DESTINATIONS = {
-    "CJU": {"name": "제주",       "country": "국내"},
-    "PUS": {"name": "부산 (김해)", "country": "국내"},
-    "TAE": {"name": "대구",       "country": "국내"},
-    "RSU": {"name": "여수",       "country": "국내"},
-    "KWJ": {"name": "광주",       "country": "국내"},
-    "CJJ": {"name": "청주",       "country": "국내"},
-    "YNY": {"name": "양양",       "country": "국내"},
-    "KPO": {"name": "포항 (경주)", "country": "국내"},
-    "USN": {"name": "울산",       "country": "국내"},
-    "MWX": {"name": "무안",       "country": "국내"},
-    "HIN": {"name": "진주 (사천)", "country": "국내"},
-    "WJU": {"name": "원주",       "country": "국내"},
-}
-
-POPULAR_DESTINATIONS = {
-    "NRT": {"name": "도쿄 나리타", "country": "일본"},
-    "KIX": {"name": "오사카 간사이", "country": "일본"},
-    "FUK": {"name": "후쿠오카", "country": "일본"},
-    "BKK": {"name": "방콕", "country": "태국"},
-    "SIN": {"name": "싱가포르", "country": "싱가포르"},
-    "HKG": {"name": "홍콩", "country": "홍콩"},
-    "TPE": {"name": "타이베이", "country": "대만"},
-    "DAD": {"name": "다낭", "country": "베트남"},
-    "SGN": {"name": "호치민", "country": "베트남"},
-    "HAN": {"name": "하노이", "country": "베트남"},
-    "MNL": {"name": "마닐라", "country": "필리핀"},
-    "CEB": {"name": "세부", "country": "필리핀"},
-    "DPS": {"name": "발리", "country": "인도네시아"},
-    "KUL": {"name": "쿠알라룸푸르", "country": "말레이시아"},
-    "PNH": {"name": "프놈펜", "country": "캄보디아"},
-    "REP": {"name": "시엠립", "country": "캄보디아"},
-    "LAX": {"name": "로스앤젤레스", "country": "미국"},
-    "JFK": {"name": "뉴욕", "country": "미국"},
-    "SFO": {"name": "샌프란시스코", "country": "미국"},
-    "CDG": {"name": "파리", "country": "프랑스"},
-    "LHR": {"name": "런던", "country": "영국"},
-    "FCO": {"name": "로마", "country": "이탈리아"},
-    "BCN": {"name": "바르셀로나", "country": "스페인"},
-    "SYD": {"name": "시드니", "country": "호주"},
-    "GUM": {"name": "괌", "country": "미국"},
-}
+KOREAN_AIRPORTS = _DESTINATIONS["origins"]
+DOMESTIC_DESTINATIONS = _DESTINATIONS["domestic"]
+POPULAR_DESTINATIONS = _DESTINATIONS["international"]
 
 
 # ── Helpers ──
