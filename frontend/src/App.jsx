@@ -3,6 +3,8 @@ import SearchForm from './components/SearchForm'
 import FlightResults from './components/FlightResults'
 import CheapestForm from './components/CheapestForm'
 import CheapestResults from './components/CheapestResults'
+import BestDatesForm from './components/BestDatesForm'
+import BestDatesResults from './components/BestDatesResults'
 import HotelForm from './components/HotelForm'
 import HotelResults from './components/HotelResults'
 import ActivityForm from './components/ActivityForm'
@@ -55,6 +57,7 @@ function App() {
 
   const flights = useSearch(`${API}/flights/search`)
   const cheapest = useSearch(`${API}/flights/cheapest-destinations`)
+  const bestDates = useSearch(`${API}/flights/best-dates`)
   const hotels = useSearch(`${API}/hotels/search`)
   const activities = useSearch(`${API}/activities/search`)
 
@@ -64,6 +67,7 @@ function App() {
 
   const tabs = [
     { id: 'search', label: '항공편' },
+    { id: 'best-dates', label: '최저가 날짜' },
     { id: 'cheapest', label: '최저가 목적지' },
     { id: 'hotels', label: '해외 호텔' },
     { id: 'activities', label: '해외 액티비티' },
@@ -103,6 +107,17 @@ function App() {
             )}
             {!flights.loading && flights.searched && (
               <FlightResults flights={flights.data?.flights || []} bookingLinks={flights.data?.booking_links} />
+            )}
+          </>
+        )}
+
+        {tab === 'best-dates' && (
+          <>
+            <BestDatesForm airports={airports} onSearch={bestDates.search} loading={bestDates.loading} />
+            {bestDates.error && <div className="error-msg">{bestDates.error}</div>}
+            {bestDates.loading && <div className="loading">전체 기간의 날짜별 왕복 최저가를 조회하고 있습니다...</div>}
+            {!bestDates.loading && bestDates.searched && (
+              <BestDatesResults data={bestDates.data} />
             )}
           </>
         )}
