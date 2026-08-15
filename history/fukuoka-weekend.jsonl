@@ -2,3 +2,4 @@
 {"at": "2026-08-13 12:57:30", "best_price": 460200, "dep_date": "2026-10-13", "ret_date": "2026-10-15", "nights": 2, "airline": "Air Busan", "reasons": []}
 {"at": "2026-08-14 01:24:14", "best_price": 460400, "dep_date": "2026-10-13", "ret_date": "2026-10-15", "nights": 2, "airline": "Air Busan", "reasons": []}
 {"at": "2026-08-14 12:54:03", "best_price": 400600, "dep_date": "2026-10-13", "ret_date": "2026-10-15", "nights": 2, "airline": "Jeju Air", "reasons": ["drop", "atl"]}
+{"at": "2026-08-15 00:54:54", "best_price": 400400, "dep_date": "2026-10-13", "ret_date": "2026-10-15", "nights": 2, "airline": "Jeju Air", "reasons": ["atl"]}
