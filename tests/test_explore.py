@@ -11,6 +11,7 @@ sys.path.insert(0, _ROOT)
 
 from explore import rank as rank_mod  # noqa: E402
 from explore import main as explore_main  # noqa: E402
+from explore import trend as trend_mod  # noqa: E402
 
 
 def _offers(*triples):
@@ -110,7 +111,11 @@ def test_markdown_handles_empty_ranking():
 
 @pytest.fixture
 def stub_graph(monkeypatch, tmp_path):
-    """가격 그래프를 목적지별 고정 가격으로 대체하고 결과를 tmp에 쓰게 한다."""
+    """가격 그래프를 목적지별 고정 가격으로 대체하고 결과를 tmp에 쓰게 한다.
+
+    run()은 결과 파일과 탐색 이력을 **각각 다른 디렉터리**에 쓴다. 둘 다 돌려놓지
+    않으면 테스트가 리포지토리의 진짜 이력에 가짜 관측을 섞는다.
+    """
     prices = {"NRT": 700000, "KIX": 500000, "FUK": 300000}
     calls = []
 
@@ -123,7 +128,30 @@ def stub_graph(monkeypatch, tmp_path):
 
     monkeypatch.setattr(explore_main.gflights, "fetch_price_graph", fake)
     monkeypatch.setattr(explore_main, "RESULTS_DIR", str(tmp_path))
+    monkeypatch.setattr(trend_mod, "HISTORY_DIR", str(tmp_path / "history"))
     return calls, tmp_path
+
+
+def test_run_writes_history_to_its_own_dir(stub_graph):
+    """이력이 결과 디렉터리가 아니라 이력 디렉터리로 가는지 확인한다."""
+    _calls, tmp_path = stub_graph
+    explore_main.run(["--start", "2027-02-01", "--end", "2027-02-10",
+                      "--only", "FUK", "--tag", "hist"])
+
+    assert (tmp_path / "history" / "hist.jsonl").exists()
+    assert not (tmp_path / "hist.jsonl").exists()
+
+
+def test_history_accumulates_across_runs(stub_graph):
+    """같은 tag로 두 번 돌리면 관측이 두 줄 쌓인다."""
+    _calls, tmp_path = stub_graph
+    argv = ["--start", "2027-02-01", "--end", "2027-02-10",
+            "--only", "FUK", "--tag", "acc"]
+    explore_main.run(argv)
+    explore_main.run(argv)
+
+    monkeypatch_free = (tmp_path / "history" / "acc.jsonl").read_text(encoding="utf-8")
+    assert len([ln for ln in monkeypatch_free.splitlines() if ln.strip()]) == 2
 
 
 def test_run_ranks_and_writes_files(stub_graph):
