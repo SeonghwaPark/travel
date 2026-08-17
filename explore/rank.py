@@ -77,8 +77,12 @@ def _won(n):
     return f"{n:,}원"
 
 
-def to_markdown(result):
-    """커밋해두고 사람이 읽을 결과 표."""
+def to_markdown(result, contexts=None):
+    """커밋해두고 사람이 읽을 결과 표.
+
+    contexts: {목적지코드: trend.context()} — 과거 스캔 대비 위치. 있으면 열이 하나 는다.
+    """
+    contexts = contexts or {}
     m = result["meta"]
     pax_desc = f"성인 {m['adults']}"
     if m["children"]:
@@ -100,22 +104,39 @@ def to_markdown(result):
         lines += ["> 가격을 받아오지 못했습니다. 로그를 확인하세요.", ""]
         return "\n".join(lines)
 
-    lines += [
-        "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 |",
-        "|---|--------|------|-------|------|------|----|------------------|",
-    ]
+    has_ctx = any(contexts.get(r["code"]) for r in result["ranking"])
+    if has_ctx:
+        lines += [
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 | 과거 스캔 대비 |",
+            "|---|--------|------|-------|------|------|----|------------------|----------------|",
+        ]
+    else:
+        lines += [
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 |",
+            "|---|--------|------|-------|------|------|----|------------------|",
+        ]
     for i, r in enumerate(result["ranking"], 1):
         dip = f"−{r['dip_pct']}%" if r["dip_pct"] > 0 else "—"
-        lines.append(
-            f"| {i} | {r['name']} ({r['code']}) | {_won(r['best_price'])} | "
-            f"{_won(r['per_person'])} | {r['departure_date']} | {r['return_date']} | "
-            f"{r['nights']} | {dip} |"
-        )
+        row = (f"| {i} | {r['name']} ({r['code']}) | {_won(r['best_price'])} | "
+               f"{_won(r['per_person'])} | {r['departure_date']} | {r['return_date']} | "
+               f"{r['nights']} | {dip} |")
+        if has_ctx:
+            from . import trend as trend_mod
+            row += f" {trend_mod.describe(contexts.get(r['code'])) or '—'} |"
+        lines.append(row)
 
     lines += [
         "",
         "> **기간 중앙값 대비**는 그 목적지의 조회 기간 안에서 이 날짜가 얼마나 싼지를 뜻한다.",
         "> 목적지끼리 비교하는 값이 아니라, 같은 목적지 안에서 타이밍이 좋은지를 본다.",
+    ]
+    if has_ctx:
+        lines += [
+            "",
+            "> **과거 스캔 대비**는 같은 조건(기간·박수·인원)으로 돌린 이전 스캔들과 비교한 값이다.",
+            "> 이게 있어야 '지금 사도 되는 가격인가'에 답할 수 있다. 관측 2회부터 나온다.",
+        ]
+    lines += [
         "",
         "> 가격은 Google Flights 표시가(왕복, 전체 승객 합계)다. 실제 결제가는 예약처에서 확인해야 한다.",
     ]

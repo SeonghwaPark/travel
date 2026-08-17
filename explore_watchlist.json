@@ -1,0 +1,27 @@
+{
+  "_comment": "정기 탐색 질문 목록. 주 1회 자동 실행되어 explore/history/에 시계열이 쌓인다. 조건(기간·박수·인원)이 같아야 회차끼리 비교되므로, 한번 정한 질문은 되도록 그대로 둔다. 조건을 바꾸면 tag가 바뀌어 이력이 처음부터 다시 쌓인다.",
+  "questions": [
+    {
+      "id": "family-feb2027",
+      "label": "2027년 2월 가족여행 — 어디가 제일 싼가",
+      "start": "2027-02-01",
+      "end": "2027-02-28",
+      "nights": "5,6",
+      "adults": 2,
+      "children": 1,
+      "infants": 0,
+      "scope": "international"
+    },
+    {
+      "id": "family-winter2027",
+      "label": "2027년 겨울~초봄 전체 — 시기까지 열어놓고 탐색",
+      "start": "2027-01-01",
+      "end": "2027-03-31",
+      "nights": "5,6,7",
+      "adults": 2,
+      "children": 1,
+      "infants": 0,
+      "scope": "international"
+    }
+  ]
+}

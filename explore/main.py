@@ -23,7 +23,9 @@ sys.path.insert(0, os.path.join(
 
 import gflights  # noqa: E402
 
+from . import links as links_mod  # noqa: E402
 from . import rank as rank_mod  # noqa: E402
+from . import trend as trend_mod  # noqa: E402
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESTINATIONS_JSON = os.path.join(_ROOT, "destinations.json")
@@ -159,6 +161,10 @@ def run(argv=None):
     nsig = "-".join(str(n) for n in nights_list) + "n"
     psig = f"{a.adults}a{a.children}c{a.infants}i"
     tag = a.tag or f"{a.origin.upper()}-{start_s}-{end_s}-{nsig}-{psig}"
+    # 과거 대비 위치는 이번 결과를 이력에 넣기 *전에* 구해야 한다.
+    # 넣고 나서 구하면 자기 자신과 비교해 항상 "역대 최저 대비 0%"가 된다.
+    contexts = trend_mod.contexts_for(tag, result)
+
     os.makedirs(RESULTS_DIR, exist_ok=True)
     jpath = os.path.join(RESULTS_DIR, f"{tag}.json")
     mpath = os.path.join(RESULTS_DIR, f"{tag}.md")
@@ -166,9 +172,15 @@ def run(argv=None):
         json.dump(result, f, ensure_ascii=False, indent=2)
         f.write("\n")
     with open(mpath, "w", encoding="utf-8") as f:
-        f.write(rank_mod.to_markdown(result) + "\n")
+        f.write(rank_mod.to_markdown(result, contexts) + "\n")
+        f.write("\n" + links_mod.to_markdown(result) + "\n")
+
+    hpath = trend_mod.append(tag, result)
 
     print(f"\n저장: {jpath}\n      {mpath}")
+    if hpath:
+        n = len(trend_mod.load(tag))
+        print(f"      {hpath} (누적 {n}회)")
     if result["ranking"]:
         top = result["ranking"][0]
         print(f"\n최저가: {top['name']} {top['best_price']:,}원 "
