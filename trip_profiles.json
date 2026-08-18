@@ -5,6 +5,46 @@
   "_noted_at": "2026-08-13",
   "child_cost_ratio": 0.6,
   "destinations": {
+    "CEB": {
+      "name": "세부",
+      "daily_cost": 70000,
+      "flight_hours": 4.5,
+      "family": {
+        "score": 4,
+        "why": "리조트 물놀이가 확실하다. 다만 비행이 길고 시내 이동이 번잡하다."
+      },
+      "best_months": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "season_note": "건기라 2월이 좋다. 리조트에 머무는 형태면 만족도가 높다.",
+      "highlights": [
+        {
+          "name": "리조트 물놀이",
+          "for": "숙소 자체가 목적지",
+          "kid": true
+        },
+        {
+          "name": "아일랜드 호핑",
+          "for": "배 투어",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 160000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-24",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
     "CTS": {
       "name": "삿포로",
       "daily_cost": 90000,
@@ -78,6 +118,161 @@
         }
       ]
     },
+    "DXB": {
+      "name": "두바이",
+      "daily_cost": 150000,
+      "daily_cost_confidence": "low",
+      "flight_hours": 9.5,
+      "family": {
+        "score": 4,
+        "why": "워터파크·아쿠아리움·사막 사파리 등 아이용 대형 시설이 몰려 있고 대부분 실내·냉방이라 날씨를 안 탄다. 다만 대중교통이 약해 이동이 차 위주라 비용이 붙는다."
+      },
+      "best_months": [
+        11,
+        12,
+        1,
+        2,
+        3
+      ],
+      "season_note": "겨울이 제철이다. 12~2월은 낮 최고 24~26도로 야외 활동이 쾌적하고, 여름(6~9월)은 40도를 넘어 사실상 실내만 가능하다. 연말연시 숙박비가 크게 뛴다.",
+      "highlights": [
+        {
+          "name": "사막 사파리",
+          "for": "듄배싱·낙타·베두인 캠프 저녁",
+          "kid": true
+        },
+        {
+          "name": "부르즈 할리파 전망대",
+          "for": "124/148층, 분수쇼와 묶어 저녁",
+          "kid": true
+        },
+        {
+          "name": "두바이 아쿠아리움",
+          "for": "두바이몰 안, 반나절 실내",
+          "kid": true
+        },
+        {
+          "name": "아틀란티스 아쿠아벤처",
+          "for": "워터파크, 겨울에도 수온 관리됨",
+          "kid": true
+        },
+        {
+          "name": "글로벌 빌리지",
+          "for": "10~4월만 여는 야외 테마파크",
+          "kid": true
+        },
+        {
+          "name": "알파히디 구도심 + 아브라",
+          "for": "수크·전통가옥, 도보",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 200000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-20",
+          "to": "01-05",
+          "factor": 1.6,
+          "reason": "연말연시 최성수기",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
+    "FUK": {
+      "name": "후쿠오카",
+      "daily_cost": 85000,
+      "flight_hours": 1.5,
+      "family": {
+        "score": 3,
+        "why": "온천과 먹거리 중심. 아이가 열광할 요소는 적지만 이동이 가장 편하다."
+      },
+      "best_months": [
+        3,
+        4,
+        10,
+        11
+      ],
+      "season_note": "겨울에도 홋카이도보다 훨씬 온화하다. 공항에서 시내까지 지하철 5분으로 접근성이 최상.",
+      "highlights": [
+        {
+          "name": "유후인",
+          "for": "온천 마을, 특급 2시간",
+          "kid": false
+        },
+        {
+          "name": "벳푸 지옥순례",
+          "for": "온천 지대 구경",
+          "kid": true
+        },
+        {
+          "name": "다자이후",
+          "for": "전철 30분",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 160000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "04-29",
+          "to": "05-05",
+          "factor": 1.5,
+          "reason": "골든위크",
+          "confidence": "low",
+          "lunar": false
+        },
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.4,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
+    "GUM": {
+      "name": "괌",
+      "daily_cost": 130000,
+      "flight_hours": 4.5,
+      "family": {
+        "score": 4,
+        "why": "안전하고 리조트가 잘 갖춰져 있다. 물가가 비싼 게 부담."
+      },
+      "best_months": [
+        12,
+        1,
+        2,
+        3
+      ],
+      "season_note": "2월은 건기로 날씨가 좋다.",
+      "highlights": [
+        {
+          "name": "리조트 워터파크",
+          "for": "숙소 내에서 해결",
+          "kid": true
+        },
+        {
+          "name": "돌핀 크루즈",
+          "for": "반나절",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 280000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-24",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
     "HKD": {
       "name": "하코다테",
       "daily_cost": 85000,
@@ -125,112 +320,6 @@
           "reason": "연말연시",
           "confidence": "low",
           "lunar": false
-        }
-      ]
-    },
-    "TPE": {
-      "name": "타이베이",
-      "daily_cost": 60000,
-      "flight_hours": 2.5,
-      "family": {
-        "score": 3,
-        "why": "먹거리·분위기 중심이라 어른 취향이 강하다. 아이용은 천등·동물원·곤돌라 정도."
-      },
-      "best_months": [
-        4,
-        5,
-        10,
-        11
-      ],
-      "season_note": "1~3월 북부는 흐리고 비가 잦다. 겨울에 간다면 남부(타이난·가오슝) 비중을 키워야 한다. 춘절(2월 초)엔 상점이 대거 휴업.",
-      "highlights": [
-        {
-          "name": "스펀 천등 날리기",
-          "for": "소원 적어 하늘로",
-          "kid": true
-        },
-        {
-          "name": "지우펀",
-          "for": "홍등 거리, 스펀과 묶어 하루",
-          "kid": false
-        },
-        {
-          "name": "타이베이 동물원 + 마오콩 곤돌라",
-          "for": "판다, 유리바닥 곤돌라. 붙어 있음",
-          "kid": true
-        },
-        {
-          "name": "베이터우 온천",
-          "for": "지하철로 가는 온천, 가족탕 많음",
-          "kid": true
-        },
-        {
-          "name": "국립대만과학교육관",
-          "for": "체험형 실내, 비 오는 날 대안",
-          "kid": true
-        },
-        {
-          "name": "타이난·가오슝",
-          "for": "고속철 2시간, 겨울에도 맑고 따뜻",
-          "kid": false
-        }
-      ],
-      "lodging_per_night": 130000,
-      "lodging_confidence": "low",
-      "season_multipliers": [
-        {
-          "from": "01-25",
-          "to": "02-18",
-          "factor": 1.6,
-          "reason": "춘절",
-          "confidence": "low",
-          "lunar": true
-        }
-      ]
-    },
-    "KHH": {
-      "name": "가오슝",
-      "daily_cost": 55000,
-      "flight_hours": 3.0,
-      "family": {
-        "score": 3,
-        "why": "따뜻하고 여유롭지만 아이 전용 시설은 적다."
-      },
-      "best_months": [
-        1,
-        2,
-        3,
-        11,
-        12
-      ],
-      "season_note": "겨울에도 맑고 25도 안팎. 대만에서 겨울 여행지로는 북부보다 낫다.",
-      "highlights": [
-        {
-          "name": "치진섬",
-          "for": "페리 10분, 해산물·모래사장",
-          "kid": true
-        },
-        {
-          "name": "롄츠탄 용호탑",
-          "for": "사진 명소",
-          "kid": false
-        },
-        {
-          "name": "보얼예술특구",
-          "for": "창고 개조 예술지구",
-          "kid": false
-        }
-      ],
-      "lodging_per_night": 110000,
-      "lodging_confidence": "low",
-      "season_multipliers": [
-        {
-          "from": "01-25",
-          "to": "02-18",
-          "factor": 1.5,
-          "reason": "춘절",
-          "confidence": "low",
-          "lunar": true
         }
       ]
     },
@@ -287,6 +376,238 @@
           "from": "12-24",
           "to": "01-02",
           "factor": 1.4,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
+    "KHH": {
+      "name": "가오슝",
+      "daily_cost": 55000,
+      "flight_hours": 3.0,
+      "family": {
+        "score": 3,
+        "why": "따뜻하고 여유롭지만 아이 전용 시설은 적다."
+      },
+      "best_months": [
+        1,
+        2,
+        3,
+        11,
+        12
+      ],
+      "season_note": "겨울에도 맑고 25도 안팎. 대만에서 겨울 여행지로는 북부보다 낫다.",
+      "highlights": [
+        {
+          "name": "치진섬",
+          "for": "페리 10분, 해산물·모래사장",
+          "kid": true
+        },
+        {
+          "name": "롄츠탄 용호탑",
+          "for": "사진 명소",
+          "kid": false
+        },
+        {
+          "name": "보얼예술특구",
+          "for": "창고 개조 예술지구",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 110000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "01-25",
+          "to": "02-18",
+          "factor": 1.5,
+          "reason": "춘절",
+          "confidence": "low",
+          "lunar": true
+        }
+      ]
+    },
+    "KIX": {
+      "name": "오사카",
+      "daily_cost": 90000,
+      "flight_hours": 2.0,
+      "family": {
+        "score": 5,
+        "why": "유니버설·카이유칸·나라 사슴공원이 모두 1시간 안에 있다."
+      },
+      "best_months": [
+        3,
+        4,
+        10,
+        11
+      ],
+      "season_note": "2월은 춥지만 실내 시설이 많다. 교토·고베·나라가 30분~1시간 거리라 확장성이 좋다.",
+      "highlights": [
+        {
+          "name": "유니버설 스튜디오 재팬",
+          "for": "8세 전후에 최적",
+          "kid": true
+        },
+        {
+          "name": "가이유칸 수족관",
+          "for": "세계 최대급, 실내",
+          "kid": true
+        },
+        {
+          "name": "나라 사슴공원",
+          "for": "전철 40분",
+          "kid": true
+        },
+        {
+          "name": "교토",
+          "for": "30분~1시간",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 180000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "03-25",
+          "to": "04-10",
+          "factor": 1.5,
+          "reason": "벚꽃",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "04-29",
+          "to": "05-05",
+          "factor": 1.7,
+          "reason": "골든위크",
+          "confidence": "medium",
+          "lunar": false
+        },
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "medium",
+          "lunar": false
+        }
+      ]
+    },
+    "KMQ": {
+      "name": "고마쓰 (가나자와)",
+      "daily_cost": 90000,
+      "daily_cost_confidence": "low",
+      "flight_hours": 2.0,
+      "family": {
+        "score": 3,
+        "why": "겐로쿠엔·미술관·시장 등 어른 취향이 강하다. 아이용은 눈놀이와 21세기미술관 체험존 정도이고 시라카와고는 이동이 길다."
+      },
+      "best_months": [
+        1,
+        2,
+        4,
+        11
+      ],
+      "season_note": "1~2월이 설경 제철이다. 호쿠리쿠는 눈이 많고 겐로쿠엔 유키즈리는 겨울에만 걸린다. 시라카와고 겨울 라이트업은 1~2월 중 지정된 며칠 저녁만 열고 사전예약제라 일정 확인이 먼저다.",
+      "highlights": [
+        {
+          "name": "겐로쿠엔",
+          "for": "일본 3대 정원, 겨울 유키즈리 설경",
+          "kid": false
+        },
+        {
+          "name": "시라카와고",
+          "for": "버스 1시간 15분, 갓쇼즈쿠리 설경",
+          "kid": true
+        },
+        {
+          "name": "21세기미술관",
+          "for": "수영장 작품 등 체험형, 실내",
+          "kid": true
+        },
+        {
+          "name": "가가온천향",
+          "for": "야마시로·야마나카 온천, 1박",
+          "kid": true
+        },
+        {
+          "name": "오미초시장",
+          "for": "겨울 대게·방어",
+          "kid": false
+        },
+        {
+          "name": "히가시차야가이",
+          "for": "옛 찻집 거리, 도보",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 150000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
+    "NGO": {
+      "name": "나고야 (주부)",
+      "daily_cost": 85000,
+      "daily_cost_confidence": "low",
+      "flight_hours": 2.0,
+      "family": {
+        "score": 4,
+        "why": "레고랜드·리니어철도관·수족관 등 아이용 대형 시설이 시내에 몰려 있다. 다만 눈을 보려면 다카야마·시라카와고로 나가야 해 이동이 길다."
+      },
+      "best_months": [
+        4,
+        11
+      ],
+      "season_note": "나고야 시내는 겨울에도 눈이 거의 안 쌓인다. 설경을 보려면 다카야마(특급 2시간 20분)나 시라카와고(버스 2시간 50분)로 나가야 하고 나고야는 그 관문 역할이다. 시내만 볼 거면 봄가을이 제철이다.",
+      "highlights": [
+        {
+          "name": "시라카와고",
+          "for": "버스 2시간 50분, 갓쇼즈쿠리 설경",
+          "kid": true
+        },
+        {
+          "name": "다카야마 옛 거리",
+          "for": "특급 2시간 20분, 아침시장·설경",
+          "kid": true
+        },
+        {
+          "name": "게로온천",
+          "for": "일본 3대 온천, 1박",
+          "kid": true
+        },
+        {
+          "name": "리니어·철도관",
+          "for": "신칸센 실물 전시, 실내",
+          "kid": true
+        },
+        {
+          "name": "레고랜드 재팬",
+          "for": "겨울엔 일부 어트랙션 휴장",
+          "kid": true
+        },
+        {
+          "name": "나고야성 + 아츠타신궁",
+          "for": "시내 도보권",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 130000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
           "reason": "연말연시",
           "confidence": "low",
           "lunar": false
@@ -359,125 +680,6 @@
         }
       ]
     },
-    "KIX": {
-      "name": "오사카",
-      "daily_cost": 90000,
-      "flight_hours": 2.0,
-      "family": {
-        "score": 5,
-        "why": "유니버설·카이유칸·나라 사슴공원이 모두 1시간 안에 있다."
-      },
-      "best_months": [
-        3,
-        4,
-        10,
-        11
-      ],
-      "season_note": "2월은 춥지만 실내 시설이 많다. 교토·고베·나라가 30분~1시간 거리라 확장성이 좋다.",
-      "highlights": [
-        {
-          "name": "유니버설 스튜디오 재팬",
-          "for": "8세 전후에 최적",
-          "kid": true
-        },
-        {
-          "name": "가이유칸 수족관",
-          "for": "세계 최대급, 실내",
-          "kid": true
-        },
-        {
-          "name": "나라 사슴공원",
-          "for": "전철 40분",
-          "kid": true
-        },
-        {
-          "name": "교토",
-          "for": "30분~1시간",
-          "kid": false
-        }
-      ],
-      "lodging_per_night": 180000,
-      "lodging_confidence": "low",
-      "season_multipliers": [
-        {
-          "from": "03-25",
-          "to": "04-10",
-          "factor": 1.5,
-          "reason": "벚꽃",
-          "confidence": "medium",
-          "lunar": false
-        },
-        {
-          "from": "04-29",
-          "to": "05-05",
-          "factor": 1.7,
-          "reason": "골든위크",
-          "confidence": "medium",
-          "lunar": false
-        },
-        {
-          "from": "12-28",
-          "to": "01-03",
-          "factor": 1.5,
-          "reason": "연말연시",
-          "confidence": "medium",
-          "lunar": false
-        }
-      ]
-    },
-    "FUK": {
-      "name": "후쿠오카",
-      "daily_cost": 85000,
-      "flight_hours": 1.5,
-      "family": {
-        "score": 3,
-        "why": "온천과 먹거리 중심. 아이가 열광할 요소는 적지만 이동이 가장 편하다."
-      },
-      "best_months": [
-        3,
-        4,
-        10,
-        11
-      ],
-      "season_note": "겨울에도 홋카이도보다 훨씬 온화하다. 공항에서 시내까지 지하철 5분으로 접근성이 최상.",
-      "highlights": [
-        {
-          "name": "유후인",
-          "for": "온천 마을, 특급 2시간",
-          "kid": false
-        },
-        {
-          "name": "벳푸 지옥순례",
-          "for": "온천 지대 구경",
-          "kid": true
-        },
-        {
-          "name": "다자이후",
-          "for": "전철 30분",
-          "kid": false
-        }
-      ],
-      "lodging_per_night": 160000,
-      "lodging_confidence": "low",
-      "season_multipliers": [
-        {
-          "from": "04-29",
-          "to": "05-05",
-          "factor": 1.5,
-          "reason": "골든위크",
-          "confidence": "low",
-          "lunar": false
-        },
-        {
-          "from": "12-28",
-          "to": "01-03",
-          "factor": 1.4,
-          "reason": "연말연시",
-          "confidence": "low",
-          "lunar": false
-        }
-      ]
-    },
     "OKA": {
       "name": "오키나와",
       "daily_cost": 85000,
@@ -532,83 +734,63 @@
         }
       ]
     },
-    "CEB": {
-      "name": "세부",
-      "daily_cost": 70000,
-      "flight_hours": 4.5,
+    "TPE": {
+      "name": "타이베이",
+      "daily_cost": 60000,
+      "flight_hours": 2.5,
       "family": {
-        "score": 4,
-        "why": "리조트 물놀이가 확실하다. 다만 비행이 길고 시내 이동이 번잡하다."
+        "score": 3,
+        "why": "먹거리·분위기 중심이라 어른 취향이 강하다. 아이용은 천등·동물원·곤돌라 정도."
       },
       "best_months": [
-        1,
-        2,
-        3,
-        4
+        4,
+        5,
+        10,
+        11
       ],
-      "season_note": "건기라 2월이 좋다. 리조트에 머무는 형태면 만족도가 높다.",
+      "season_note": "1~3월 북부는 흐리고 비가 잦다. 겨울에 간다면 남부(타이난·가오슝) 비중을 키워야 한다. 춘절(2월 초)엔 상점이 대거 휴업.",
       "highlights": [
         {
-          "name": "리조트 물놀이",
-          "for": "숙소 자체가 목적지",
+          "name": "스펀 천등 날리기",
+          "for": "소원 적어 하늘로",
           "kid": true
         },
         {
-          "name": "아일랜드 호핑",
-          "for": "배 투어",
-          "kid": true
-        }
-      ],
-      "lodging_per_night": 160000,
-      "lodging_confidence": "low",
-      "season_multipliers": [
+          "name": "지우펀",
+          "for": "홍등 거리, 스펀과 묶어 하루",
+          "kid": false
+        },
         {
-          "from": "12-24",
-          "to": "01-03",
-          "factor": 1.5,
-          "reason": "연말연시",
-          "confidence": "low",
-          "lunar": false
-        }
-      ]
-    },
-    "GUM": {
-      "name": "괌",
-      "daily_cost": 130000,
-      "flight_hours": 4.5,
-      "family": {
-        "score": 4,
-        "why": "안전하고 리조트가 잘 갖춰져 있다. 물가가 비싼 게 부담."
-      },
-      "best_months": [
-        12,
-        1,
-        2,
-        3
-      ],
-      "season_note": "2월은 건기로 날씨가 좋다.",
-      "highlights": [
-        {
-          "name": "리조트 워터파크",
-          "for": "숙소 내에서 해결",
+          "name": "타이베이 동물원 + 마오콩 곤돌라",
+          "for": "판다, 유리바닥 곤돌라. 붙어 있음",
           "kid": true
         },
         {
-          "name": "돌핀 크루즈",
-          "for": "반나절",
+          "name": "베이터우 온천",
+          "for": "지하철로 가는 온천, 가족탕 많음",
           "kid": true
+        },
+        {
+          "name": "국립대만과학교육관",
+          "for": "체험형 실내, 비 오는 날 대안",
+          "kid": true
+        },
+        {
+          "name": "타이난·가오슝",
+          "for": "고속철 2시간, 겨울에도 맑고 따뜻",
+          "kid": false
         }
       ],
-      "lodging_per_night": 280000,
+      "lodging_per_night": 130000,
       "lodging_confidence": "low",
       "season_multipliers": [
         {
-          "from": "12-24",
-          "to": "01-03",
-          "factor": 1.5,
-          "reason": "연말연시",
+          "from": "01-25",
+          "to": "02-18",
+          "factor": 1.6,
+          "reason": "춘절",
           "confidence": "low",
-          "lunar": false
+          "lunar": true
         }
       ]
     }

@@ -32,6 +32,22 @@
       "name": "오키나와 (나하)",
       "country": "일본"
     },
+    "NGO": {
+      "name": "나고야 (주부)",
+      "country": "일본"
+    },
+    "AOJ": {
+      "name": "아오모리",
+      "country": "일본"
+    },
+    "KMQ": {
+      "name": "고마쓰 (가나자와)",
+      "country": "일본"
+    },
+    "SDJ": {
+      "name": "센다이",
+      "country": "일본"
+    },
     "BKK": {
       "name": "방콕",
       "country": "태국"
@@ -88,6 +104,22 @@
       "name": "시엠립",
       "country": "캄보디아"
     },
+    "BKI": {
+      "name": "코타키나발루",
+      "country": "말레이시아"
+    },
+    "PQC": {
+      "name": "푸꾸옥",
+      "country": "베트남"
+    },
+    "CNX": {
+      "name": "치앙마이",
+      "country": "태국"
+    },
+    "MLE": {
+      "name": "몰디브 (말레)",
+      "country": "몰디브"
+    },
     "LAX": {
       "name": "로스앤젤레스",
       "country": "미국"
@@ -119,6 +151,18 @@
     "SYD": {
       "name": "시드니",
       "country": "호주"
+    },
+    "DXB": {
+      "name": "두바이",
+      "country": "아랍에미리트"
+    },
+    "AUH": {
+      "name": "아부다비",
+      "country": "아랍에미리트"
+    },
+    "DOH": {
+      "name": "도하",
+      "country": "카타르"
     },
     "GUM": {
       "name": "괌",
