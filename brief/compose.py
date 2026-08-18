@@ -19,6 +19,9 @@ RESULTS_DIR = os.path.join(_ROOT, "explore", "results")
 
 MEASURED = "실측"
 ESTIMATED = "추정"
+# 그래프도 구글에서 온 값이지만 실제 항공편 조회와 어긋난다. 둘 다 '실측'이라
+# 부르면 표에서 구분이 사라지고, 합계가 실제보다 정확해 보인다.
+GRAPH = "그래프"
 
 
 def load_profiles(path=None):
@@ -191,8 +194,13 @@ def match_quote(quotes, code, check_in, check_out, today=None):
 
 def estimate_budget(profile, nights, adults, children, flight_total,
                     stay=None, transport_total=0, child_ratio=0.6,
-                    check_in=None, bands=None):
-    """한 목적지의 총예산. 각 항목에 출처(실측/추정)와 오차 폭을 붙인다."""
+                    check_in=None, bands=None, flight_band=None):
+    """한 목적지의 총예산. 각 항목에 출처(실측/추정)와 오차 폭을 붙인다.
+
+    flight_band: 항공권 값에 씌울 오차 폭. 탐색이 넘기는 값은 가격 그래프라
+    실제 검색과 어긋난다 — 오차 0으로 두면 그 위험이 표에서 사라진다.
+    {"band": 비율, "basis": "근거"} 형태이며, 없으면 종전대로 오차 0이다.
+    """
     bands = bands or {"low": 0.40, "medium": 0.25, "high": 0.10}
     days = nights + 1
     heads = adults + children * child_ratio
@@ -217,8 +225,16 @@ def estimate_budget(profile, nights, adults, children, flight_total,
     daily = round(profile["daily_cost"] * heads) * days
 
     items = [
-        {"label": "항공권", "amount": flight_total, "source": MEASURED,
-         "note": f"{adults}성인+{children}소아 왕복 합계"},
+        {"label": "항공권", "amount": flight_total,
+         "source": (GRAPH if (flight_band and flight_band["band"]) else MEASURED),
+         **({"band": flight_band["band"],
+             "confidence": "high" if flight_band["band"] == 0 else "medium"}
+            if flight_band else {}),
+         "note": f"{adults}성인+{children}소아 왕복 합계"
+                 + (f" · 가격 그래프 (실측 대비 최대 "
+                    f"{flight_band['band'] * 100:.1f}% 어긋난 기록, "
+                    f"{flight_band['basis']})"
+                    if flight_band and flight_band["band"] else "")},
         {"label": "숙박", "amount": lodging, "source": stay_src,
          "confidence": stay_conf,
          **({"band": stay["band"]} if stay and "band" in stay else {}),
@@ -321,10 +337,22 @@ def fare_for_nights(flight, nights):
 
 
 def build(candidates, profiles, flights, stays, adults, children,
-          nights, transport_costs=None, quotes=None, today=None, snow=None):
-    """후보별 예산·적합도를 계산해 총액 오름차순으로 돌려준다."""
+          nights, transport_costs=None, quotes=None, today=None, snow=None,
+          flight_bands=None):
+    """후보별 예산·적합도를 계산해 총액 오름차순으로 돌려준다.
+
+    flight_bands: 목적지별 항공권 오차 폭. None이면 쌓인 그래프↔실측 기록에서
+    구한다. 관측이 없으면 0이 되어 종전과 같이 동작한다.
+    """
     transport_costs = transport_costs or {}
     snow = load_snow() if snow is None else snow
+    if flight_bands is None:
+        try:
+            from explore import agree as _agree
+            recs = _agree.load_history()
+            flight_bands = {c: _agree.flight_band(c, records=recs) for c in candidates}
+        except Exception:
+            flight_bands = {}
     child_ratio = profiles.get("child_cost_ratio", 0.6)
     rows, skipped = [], []
 
@@ -364,7 +392,8 @@ def build(candidates, profiles, flights, stays, adults, children,
             profile, nights, adults, children, flight["best_price"],
             stay=stay, transport_total=transport_costs.get(code, 0),
             child_ratio=child_ratio, check_in=flight.get("departure_date"),
-            bands=profiles.get("confidence_bands"))
+            bands=profiles.get("confidence_bands"),
+            flight_band=(flight_bands or {}).get(code))
 
         month = _month_of(flight.get("departure_date"))
         in_season = month in profile.get("best_months", []) if month else None

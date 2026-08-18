@@ -176,6 +176,51 @@ def summarize(pairs):
     return out
 
 
+def load_history(path=None):
+    """쌓인 짝 기록을 읽는다."""
+    path = path or AGREEMENT_JSONL
+    out = []
+    if not os.path.exists(path):
+        return out
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    out.append(json.loads(line))
+    except (OSError, json.JSONDecodeError):
+        pass
+    return out
+
+
+def flight_band(dest=None, path=None, min_pairs=3, records=None):
+    """가격 그래프 값에 씌울 오차 폭. 근거가 얇으면 얇다고 말한다.
+
+    브리프는 항공권을 '실측'으로 보고 오차 0으로 다뤘다. 실제 항공편 조회라면
+    맞지만, 탐색이 넘기는 값은 가격 그래프다. 그래프는 달력에 띄우려고 미리
+    계산해 둔 대표값이라 실제 검색과 어긋난다 — 삿포로에서 최대 7.5% 어긋났고
+    다섯 번 다 그래프가 싼 쪽이었다. 오차 0으로 두면 그 위험이 표에서 사라진다.
+
+    폭은 관측된 '최대' 어긋남을 쓴다. 평균을 쓰면 최악을 감춘다.
+    노선 관측이 충분하면 그 노선 것을, 없으면 다른 노선 것을 빌려 쓰되
+    빌렸다고 basis에 적는다. 관측이 아예 없으면 0을 주고 없다고 말한다.
+    """
+    rows = load_history(path) if records is None else records
+    mine = [r for r in rows if dest and r.get("dest") == dest]
+    pool, basis = None, None
+    if len(mine) >= min_pairs:
+        pool, basis = mine, "이 노선 관측 {}건".format(len(mine))
+    elif len(rows) >= min_pairs:
+        pool, basis = rows, "다른 노선 관측 {}건을 빌려 씀".format(len(rows))
+    elif rows:
+        pool, basis = rows, "관측 {}건뿐 — 근거가 얇다".format(len(rows))
+    if not pool:
+        return {"band": 0.0, "basis": "관측 없음", "pairs": 0, "dest_pairs": len(mine)}
+    worst = max((abs(r.get("diff_pct") or 0) for r in pool), default=0.0)
+    return {"band": round(worst / 100, 4), "basis": basis,
+            "pairs": len(pool), "dest_pairs": len(mine)}
+
+
 def append_history(pairs, path=None):
     """짝을 기록에 쌓는다. 같은 짝을 두 번 쌓지 않는다."""
     path = path or AGREEMENT_JSONL

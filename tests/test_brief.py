@@ -491,3 +491,36 @@ def test_build_attaches_snow_axis_to_rows():
     res = compose.build(["AAA"], PROFILES, {"AAA": _flight("AAA", 1000000)}, {},
                         2, 1, 6, snow={"AAA": SNOW["CTS"]})
     assert res["rows"][0]["winter_snow"]["city"] == 3
+
+
+def test_flight_band_widens_the_total_range():
+    """항공권을 오차 0으로 두면 그래프가 어긋나는 위험이 표에서 사라진다."""
+    band = {"band": 0.0749, "basis": "이 노선 관측 6건"}
+    b = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                adults=2, children=1, flight_total=1000000,
+                                flight_band=band)
+    fare = next(i for i in b["items"] if i["label"] == "항공권")
+    assert fare["low"] == 925100 and fare["high"] == 1074900
+    assert fare["confidence"] == "medium"
+    assert "최대 7.5% 어긋난 기록" in fare["note"]
+
+
+def test_no_band_keeps_previous_behaviour():
+    b = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                adults=2, children=1, flight_total=1000000)
+    fare = next(i for i in b["items"] if i["label"] == "항공권")
+    assert fare["low"] == fare["high"] == 1000000
+    assert fare["confidence"] == "high"
+
+
+def test_graph_priced_flight_is_not_labelled_measured():
+    """그래프와 실제 조회를 둘 다 '실측'이라 부르면 표에서 구분이 사라진다."""
+    band = {"band": 0.0749, "basis": "이 노선 관측 6건"}
+    b = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                adults=2, children=1, flight_total=1000000,
+                                flight_band=band)
+    assert next(i for i in b["items"] if i["label"] == "항공권")["source"] == "그래프"
+    b0 = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                 adults=2, children=1, flight_total=1000000,
+                                 flight_band={"band": 0.0, "basis": "관측 없음"})
+    assert next(i for i in b0["items"] if i["label"] == "항공권")["source"] == "실측"

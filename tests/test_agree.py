@@ -102,3 +102,36 @@ def test_watch_history_without_a_watch_entry_is_skipped(tmp_path):
     obs = agree.load_watch_observations(str(wl), str(hist))
     assert [o["watch_id"] for o in obs] == ["keep"]
     assert obs[0]["dest"] == "CTS" and obs[0]["adults"] == 2
+
+
+# ── 그래프 오차 폭 ──
+
+REC = [{"dest": "CTS", "diff_pct": 7.49}, {"dest": "CTS", "diff_pct": 7.42},
+       {"dest": "CTS", "diff_pct": 0.0}, {"dest": "NRT", "diff_pct": 2.0}]
+
+
+def test_band_uses_worst_observed_not_average():
+    """평균을 쓰면 최악을 감춘다. 오차 폭은 관측된 최대치로 잡는다."""
+    b = agree.flight_band("CTS", records=REC)
+    assert b["band"] == 0.0749
+    assert "이 노선 관측 3건" in b["basis"]
+
+
+def test_band_borrows_from_other_routes_and_says_so():
+    """이 노선 관측이 얇으면 다른 노선 것을 빌리되 빌렸다고 밝힌다."""
+    b = agree.flight_band("KMQ", records=REC)
+    assert b["band"] == 0.0749
+    assert "빌려" in b["basis"]
+    assert b["dest_pairs"] == 0
+
+
+def test_band_is_zero_when_nothing_observed():
+    """관측이 없으면 폭을 지어내지 않고 없다고 말한다."""
+    b = agree.flight_band("CTS", records=[])
+    assert b["band"] == 0.0 and b["basis"] == "관측 없음"
+
+
+def test_band_flags_thin_evidence():
+    b = agree.flight_band("CTS", records=[{"dest": "CTS", "diff_pct": 5.0}])
+    assert b["band"] == 0.05
+    assert "근거가 얇다" in b["basis"]
