@@ -5,6 +5,66 @@
   "_noted_at": "2026-08-13",
   "child_cost_ratio": 0.6,
   "destinations": {
+    "AOJ": {
+      "name": "아오모리",
+      "daily_cost": 85000,
+      "daily_cost_confidence": "low",
+      "flight_hours": 2.3,
+      "family": {
+        "score": 3,
+        "why": "적설은 압도적이라 눈놀이는 확실하다. 다만 궂은 날 들어갈 실내 시설이 적어 체력 소모가 크고, 이동이 대중교통으로 불편하다."
+      },
+      "best_months": [
+        1,
+        2,
+        8
+      ],
+      "season_note": "일본에서 눈이 가장 많이 쌓이는 도시권이다. 1~2월 시내 적설이 두껍고 핫코다 수빙은 이 두 달만 볼 수 있다. 눈 자체가 목적이면 삿포로보다 밀도가 높지만, 관광 인프라는 훨씬 얕다.",
+      "highlights": [
+        {
+          "name": "핫코다 로프웨이 수빙",
+          "for": "버스 60분, 1~2월 한정",
+          "kid": true
+        },
+        {
+          "name": "네부타 박물관 와랏세",
+          "for": "역 앞, 실내. 축제 산차 전시",
+          "kid": true
+        },
+        {
+          "name": "아오모리현립미술관",
+          "for": "아오모리견, 실내",
+          "kid": true
+        },
+        {
+          "name": "아사무시 온천",
+          "for": "전철 20분, 수족관 붙어 있음",
+          "kid": true
+        },
+        {
+          "name": "히로사키성 설경",
+          "for": "전철 40분, 겨울 등롱",
+          "kid": false
+        },
+        {
+          "name": "산나이마루야마 유적",
+          "for": "조몬 유적, 실내 전시관",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 140000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
     "CEB": {
       "name": "세부",
       "daily_cost": 70000,
@@ -382,6 +442,68 @@
         }
       ]
     },
+    "JFK": {
+      "name": "뉴욕",
+      "daily_cost": 200000,
+      "daily_cost_confidence": "low",
+      "flight_hours": 14.5,
+      "family": {
+        "score": 3,
+        "why": "자연사박물관·동물원 등 아이용 대형 시설은 최상급이다. 다만 편도 14시간 비행과 시차, 겨울 강추위, 높은 물가가 아이 동반에 부담이다."
+      },
+      "best_months": [
+        4,
+        5,
+        9,
+        10,
+        12
+      ],
+      "season_note": "1~2월 적설은 흔하지만 도시 설경이라 자연 설경과는 다르다. 눈이 목적이라면 목적지 성격이 아예 다른 후보다. 1~2월은 체감 영하 10도 아래로 떨어지는 날이 잦다.",
+      "highlights": [
+        {
+          "name": "미국자연사박물관",
+          "for": "공룡·우주, 종일 실내",
+          "kid": true
+        },
+        {
+          "name": "센트럴파크 아이스링크",
+          "for": "겨울 한정, 설경",
+          "kid": true
+        },
+        {
+          "name": "브롱크스 동물원",
+          "for": "겨울엔 일부 구역 휴장",
+          "kid": true
+        },
+        {
+          "name": "메트로폴리탄 미술관",
+          "for": "종일 실내",
+          "kid": false
+        },
+        {
+          "name": "타임스스퀘어·브로드웨이",
+          "for": "저녁",
+          "kid": false
+        },
+        {
+          "name": "자유의 여신상 페리",
+          "for": "겨울엔 갑판이 매우 춥다",
+          "kid": true
+        }
+      ],
+      "lodging_per_night": 350000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-20",
+          "to": "01-02",
+          "factor": 1.6,
+          "reason": "연말연시",
+          "confidence": "low",
+          "lunar": false
+        }
+      ]
+    },
     "KHH": {
       "name": "가오슝",
       "daily_cost": 55000,
@@ -730,6 +852,66 @@
           "factor": 1.7,
           "reason": "여름 성수기",
           "confidence": "medium",
+          "lunar": false
+        }
+      ]
+    },
+    "SDJ": {
+      "name": "센다이",
+      "daily_cost": 85000,
+      "daily_cost_confidence": "low",
+      "flight_hours": 2.5,
+      "family": {
+        "score": 3,
+        "why": "수족관·과학관 등 실내 대안이 있어 궂은 날을 넘길 수 있다. 다만 눈은 시내가 아니라 자오까지 나가야 해 하루가 통째로 든다."
+      },
+      "best_months": [
+        1,
+        2,
+        4
+      ],
+      "season_note": "센다이 시내는 해안이라 눈이 의외로 적다. 설경이 목적이면 시내가 아니라 자오(로프웨이 90분)나 나루코를 중심에 둬야 한다. 자오 수빙은 1~2월 한정이고 기상에 따라 못 볼 수도 있다.",
+      "highlights": [
+        {
+          "name": "자오 수빙 로프웨이",
+          "for": "버스 90분, 1~2월 한정",
+          "kid": true
+        },
+        {
+          "name": "우미노모리 수족관",
+          "for": "실내 반나절",
+          "kid": true
+        },
+        {
+          "name": "센다이시 과학관",
+          "for": "체험형 실내",
+          "kid": true
+        },
+        {
+          "name": "아키우·나루코 온천",
+          "for": "30~90분, 1박",
+          "kid": true
+        },
+        {
+          "name": "마츠시마",
+          "for": "전철 40분, 일본 3경",
+          "kid": false
+        },
+        {
+          "name": "즈이호덴",
+          "for": "다테 마사무네 영묘",
+          "kid": false
+        }
+      ],
+      "lodging_per_night": 130000,
+      "lodging_confidence": "low",
+      "season_multipliers": [
+        {
+          "from": "12-28",
+          "to": "01-03",
+          "factor": 1.5,
+          "reason": "연말연시",
+          "confidence": "low",
           "lunar": false
         }
       ]
