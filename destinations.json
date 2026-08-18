@@ -14,6 +14,8 @@
       "winter_snow": {
         "city": 1,
         "daytrip_min": 120,
+        "view_min": 90,
+        "view_of": "후지산 (하코네·가와구치코)",
         "note": "도쿄 적설은 연 몇 회. 니가타·닛코 신칸센 120분"
       }
     },
@@ -23,6 +25,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 90,
+        "view_min": null,
+        "view_of": null,
         "note": "오사카 시내 적설 거의 없음. 시가현 스키장 90분"
       }
     },
@@ -32,6 +36,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 150,
+        "view_min": null,
+        "view_of": null,
         "note": "규슈라 시내 적설 드물다. 구주·유후인 150분, 그마저 얕음"
       }
     },
@@ -41,6 +47,8 @@
       "winter_snow": {
         "city": 3,
         "daytrip_min": 0,
+        "view_min": 0,
+        "view_of": "데이네·모이와 — 시내에서 보인다",
         "note": "삿포로 시내가 겨울 내내 눈 속. 2월 최심 중앙구 120cm·남구 160cm"
       }
     },
@@ -50,6 +58,8 @@
       "winter_snow": {
         "city": 3,
         "daytrip_min": 0,
+        "view_min": 0,
+        "view_of": "고마가타케·하코다테산",
         "note": "하코다테 시내 적설 두껍다. 홋카이도 남부라 삿포로보다는 얕음"
       }
     },
@@ -59,6 +69,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "아열대. 눈 없음"
       }
     },
@@ -68,6 +80,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 140,
+        "view_min": 150,
+        "view_of": "기타 알프스 (신호타카 로프웨이)",
         "note": "나고야 시내는 눈이 거의 안 쌓인다. 다카야마 140분·시라카와고 170분"
       }
     },
@@ -77,6 +91,8 @@
       "winter_snow": {
         "city": 3,
         "daytrip_min": 0,
+        "view_min": 0,
+        "view_of": "핫코다 연봉 — 시내에서 보인다",
         "note": "일본 최다 적설 도시권. 핫코다 수빙 60분"
       }
     },
@@ -86,6 +102,8 @@
       "winter_snow": {
         "city": 2,
         "daytrip_min": 75,
+        "view_min": 0,
+        "view_of": "하쿠산 — 맑은 날 시내에서 보인다",
         "note": "호쿠리쿠 폭설지대, 가나자와 시내도 쌓인다. 시라카와고 버스 75분"
       }
     },
@@ -95,6 +113,8 @@
       "winter_snow": {
         "city": 1,
         "daytrip_min": 90,
+        "view_min": 90,
+        "view_of": "자오 연봉",
         "note": "센다이 시내는 해안이라 눈이 적다. 자오 수빙 90분"
       }
     },
@@ -104,6 +124,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -113,6 +135,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "적도"
       }
     },
@@ -122,6 +146,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "아열대, 겨울에도 10도 이상"
       }
     },
@@ -131,6 +157,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "아열대. 합환산 적설은 있으나 여행 동선 밖"
       }
     },
@@ -140,6 +168,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "아열대 남부"
       }
     },
@@ -149,6 +179,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -158,6 +190,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -167,6 +201,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "아열대. 사파 적설은 드물고 300분 이상"
       }
     },
@@ -176,6 +212,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -185,6 +223,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -194,6 +234,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -203,6 +245,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "적도"
       }
     },
@@ -212,6 +256,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -221,6 +267,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -230,6 +278,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -239,6 +289,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     },
@@ -248,6 +300,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "아열대, 건기 서늘하나 눈 없음"
       }
     },
@@ -257,6 +311,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "적도"
       }
     },
@@ -266,6 +322,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 120,
+        "view_min": null,
+        "view_of": null,
         "note": "시내 눈 없음. 빅베어 120분"
       }
     },
@@ -275,6 +333,8 @@
       "winter_snow": {
         "city": 2,
         "daytrip_min": 0,
+        "view_min": null,
+        "view_of": null,
         "note": "1~2월 적설 흔하다. 다만 도시 설경이라 자연 설경과는 다름"
       }
     },
@@ -284,6 +344,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 210,
+        "view_min": null,
+        "view_of": null,
         "note": "시내 눈 없음. 타호 210분"
       }
     },
@@ -293,6 +355,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 240,
+        "view_min": null,
+        "view_of": null,
         "note": "파리 적설 드물다. 알프스까지 240분 이상"
       }
     },
@@ -302,6 +366,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 240,
+        "view_min": null,
+        "view_of": null,
         "note": "런던 적설 드물다"
       }
     },
@@ -311,6 +377,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 120,
+        "view_min": null,
+        "view_of": null,
         "note": "로마 시내 눈 없음. 아펜니노 120분"
       }
     },
@@ -320,6 +388,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": 150,
+        "view_min": null,
+        "view_of": null,
         "note": "바르셀로나 눈 없음. 피레네 150분"
       }
     },
@@ -329,6 +399,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "남반구 한여름"
       }
     },
@@ -338,6 +410,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "사막, 겨울 낮 24~26도"
       }
     },
@@ -347,6 +421,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "사막"
       }
     },
@@ -356,6 +432,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "사막"
       }
     },
@@ -365,6 +443,8 @@
       "winter_snow": {
         "city": 0,
         "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
         "note": "열대"
       }
     }
@@ -419,5 +499,5 @@
       "country": "국내"
     }
   },
-  "_winter_snow_note": "winter_snow는 1~2월 기준 설경 축이다. city = 시내 적설: 0 눈이 안 온다 / 1 드물게·얕게 쌓인다 / 2 겨울 내내 대체로 쌓여 있다 / 3 두껍게 쌓여 여행 전체가 눈 속. daytrip_min = 확실한 설경까지 편도 이동 시간(분), city가 2 이상이면 0, 당일치기가 비현실적이면 null. 값은 전부 어림이며 근거는 note에 적는다. 탐색이 '설경 되는 곳 중 최저가'를 정렬할 수 있게 하려고 목적지 목록에 둔다 — trip_profiles는 14곳뿐이라 40곳 정렬에 못 쓴다."
+  "_winter_snow_note": "winter_snow는 1~2월 기준 설경 축이다. 세 축을 한 숫자로 뭉개지 않는다 — 발밑에 눈이 있는 것, 눈을 밟으러 나가는 것, 설산을 바라보는 것은 서로 다른 여행이다. city = 시내 적설: 0 눈이 안 온다 / 1 드물게·얕게 쌓인다 / 2 겨울 내내 대체로 쌓여 있다 / 3 두껍게 쌓여 여행 전체가 눈 속. daytrip_min = 눈을 밟을 수 있는 곳까지 편도 이동 시간(분), city가 2 이상이면 0, 당일치기가 비현실적이면 null. view_min = 이름난 설산을 조망하는 지점까지 편도 이동 시간(분), 시내에서 보이면 0, 그런 산이 없으면 null. view_of에 무엇을 보는지 적는다. 값은 전부 어림이며 근거는 note에 적는다. 탐색이 목표로 정렬할 수 있게 목적지 목록에 둔다."
 }

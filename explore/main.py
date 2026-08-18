@@ -42,7 +42,7 @@ def load_destinations(scope):
     return dict(data["international"])
 
 
-def filter_by_snow(destinations, min_snow=None, max_daytrip=None):
+def filter_by_snow(destinations, min_snow=None, max_daytrip=None, max_view=None):
     """설경 축으로 목적지를 거른다. 거른 결과와 탈락 사유를 함께 돌려준다.
 
     "1~2월 어디가 싼가"의 답 1·2위가 마닐라·타이베이로 나오는 건 순위가 틀려서가
@@ -51,7 +51,7 @@ def filter_by_snow(destinations, min_snow=None, max_daytrip=None):
 
     두 축은 AND로 걸린다. city가 2 이상이면 daytrip은 0이므로 서로 부딪히지 않는다.
     """
-    if min_snow is None and max_daytrip is None:
+    if min_snow is None and max_daytrip is None and max_view is None:
         return destinations, []
     kept, dropped = {}, []
     for code, info in destinations.items():
@@ -61,7 +61,15 @@ def filter_by_snow(destinations, min_snow=None, max_daytrip=None):
             dropped.append((code, f"시내 적설 {city if city is not None else '미상'} < {min_snow}"))
             continue
         if max_daytrip is not None and (day is None or day > max_daytrip):
-            dropped.append((code, f"설경 접근 {day if day is not None else '불가'}분 > {max_daytrip}분"))
+            dropped.append((code, "눈 밟기 "
+                            + (f"{day}분" if day is not None else "불가")
+                            + f" > {max_daytrip}분"))
+            continue
+        view = ws.get("view_min")
+        if max_view is not None and (view is None or view > max_view):
+            dropped.append((code, "설산 조망 "
+                            + (f"{view}분" if view is not None else "없음")
+                            + f" > {max_view}분"))
             continue
         kept[code] = info
     return kept, dropped
@@ -95,7 +103,9 @@ def parse_args(argv=None):
     p.add_argument("--min-snow", type=int, default=None,
                    help="시내 적설 최소치(0~3). 예: 2면 겨울 내내 쌓이는 곳만")
     p.add_argument("--max-snow-daytrip", type=int, default=None,
-                   help="설경까지 편도 이동 상한(분). 예: 120이면 2시간 안에 눈을 볼 수 있는 곳만")
+                   help="눈을 밟을 수 있는 곳까지 편도 이동 상한(분)")
+    p.add_argument("--max-snow-view", type=int, default=None,
+                   help="설산 조망 지점까지 편도 이동 상한(분). 후지산처럼 '보는' 설경")
     p.add_argument("--workers", type=int, default=3)
     p.add_argument("--tag", default="", help="결과 파일명 (기본: origin-start-end)")
     return p.parse_args(argv)
@@ -130,7 +140,7 @@ def run(argv=None):
         destinations = {c: destinations[c] for c in wanted if c in destinations}
     destinations.pop(a.origin.upper(), None)  # 출발지 자기 자신 제외
     destinations, snow_dropped = filter_by_snow(
-        destinations, a.min_snow, a.max_snow_daytrip)
+        destinations, a.min_snow, a.max_snow_daytrip, a.max_snow_view)
     if snow_dropped:
         print(f"[설경 필터] {len(snow_dropped)}곳 제외 "
               f"({', '.join(c for c, _ in snow_dropped[:8])}"

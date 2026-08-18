@@ -77,19 +77,30 @@ def rank(summaries):
 def snow_label(ws):
     """설경 축을 한 칸에 담는다. 값이 없으면 '—'.
 
-    시내 적설과 당일치기 접근을 한 숫자로 뭉개지 않는다 — 나고야(시내 0·당일 140분)와
-    고마쓰(시내 2·당일 75분)는 같은 점수로 묶이면 안 되는 서로 다른 여행이다.
+    세 축을 한 숫자로 뭉개지 않는다 — 발밑에 눈이 있는 것(city), 눈을 밟으러
+    나가는 것(daytrip_min), 설산을 바라보는 것(view_min)은 서로 다른 여행이다.
+    나고야(시내 0·밟기 140분)와 고마쓰(시내 2)를 같은 점수로 묶으면 안 된다.
+
+    표 한 칸이라 시내 적설에 더해 '가까운 쪽 하나'만 붙인다. 나머지는 JSON에 있다.
     """
     if not ws:
         return "—"
-    city, d = ws.get("city"), ws.get("daytrip_min")
+    city = ws.get("city")
     if city is None:
         return "—"
     if city >= 2:
         return f"시내 {city}"
+    day, view = ws.get("daytrip_min"), ws.get("view_min")
+    near = None
+    if day is not None and view is not None:
+        near = (f"밟기 {day}분" if day <= view else f"조망 {view}분")
+    elif day is not None:
+        near = f"밟기 {day}분"
+    elif view is not None:
+        near = f"조망 {view}분"
     if city == 1:
-        return f"시내 1" + (f" · 당일 {d}분" if d else "")
-    return f"당일 {d}분" if d else "없음"
+        return "시내 1" + (f" · {near}" if near else "")
+    return near or "없음"
 
 
 def _won(n):

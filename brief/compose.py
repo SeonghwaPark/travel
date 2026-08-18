@@ -14,6 +14,7 @@ from datetime import date
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROFILES_JSON = os.path.join(_ROOT, "trip_profiles.json")
+DESTINATIONS_JSON = os.path.join(_ROOT, "destinations.json")
 RESULTS_DIR = os.path.join(_ROOT, "explore", "results")
 
 MEASURED = "실측"
@@ -23,6 +24,42 @@ ESTIMATED = "추정"
 def load_profiles(path=None):
     with open(path or PROFILES_JSON, encoding="utf-8") as f:
         return json.load(f)
+
+
+def load_snow(path=None):
+    """목적지별 설경 축. 브리프는 프로필만 읽었지만 설경은 destinations.json에 있다.
+
+    탐색은 이 축으로 후보를 걸러 놓고, 브리프는 그걸 모른 채 아이 적합도로 추천했다.
+    후보 목록은 목표에 맞는데 그중 하나를 고르는 단계에서 목표를 잊는 구멍이었다.
+    """
+    try:
+        with open(path or DESTINATIONS_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+    out = {}
+    for group in ("international", "domestic"):
+        for code, info in (data.get(group) or {}).items():
+            if info.get("winter_snow"):
+                out[code] = info["winter_snow"]
+    return out
+
+
+def snow_qualifies(ws, max_min=120):
+    """'설경 여행'이라 부를 수 있는가. 축을 점수로 뭉개지 않고 조건으로 본다.
+
+    시내에 눈이 쌓여 있거나(city>=2), 눈을 밟으러 max_min 안에 갈 수 있거나,
+    이름난 설산을 max_min 안에서 조망할 수 있으면 만족으로 본다.
+    """
+    if not ws:
+        return False
+    if (ws.get("city") or 0) >= 2:
+        return True
+    for k in ("daytrip_min", "view_min"):
+        v = ws.get(k)
+        if v is not None and v <= max_min:
+            return True
+    return False
 
 
 # ── 스캔 결과 읽기 ──
@@ -284,9 +321,10 @@ def fare_for_nights(flight, nights):
 
 
 def build(candidates, profiles, flights, stays, adults, children,
-          nights, transport_costs=None, quotes=None, today=None):
+          nights, transport_costs=None, quotes=None, today=None, snow=None):
     """후보별 예산·적합도를 계산해 총액 오름차순으로 돌려준다."""
     transport_costs = transport_costs or {}
+    snow = load_snow() if snow is None else snow
     child_ratio = profiles.get("child_cost_ratio", 0.6)
     rows, skipped = [], []
 
@@ -341,6 +379,7 @@ def build(candidates, profiles, flights, stays, adults, children,
             "family_score": profile["family"]["score"],
             "family_why": profile["family"]["why"],
             "season_note": profile.get("season_note", ""),
+            "winter_snow": snow.get(code),
             "in_season": in_season,
             "highlights": profile.get("highlights", []),
         })
@@ -375,9 +414,29 @@ def mark_separability(rows):
 
 
 def recommend(rows, prefer="balanced"):
-    """추천 하나와 이유. prefer: budget | family | balanced"""
+    """추천 하나와 이유. prefer: budget | family | snow | balanced"""
     if not rows:
         return None
+    if prefer == "snow":
+        # 설경을 점수로 만들어 예산과 더하지 않는다. 조건을 만족하는 후보로
+        # 좁힌 뒤 그 안에서 총예산 최저를 고른다 — 눈이 목적이면 눈이 없는 곳은
+        # 아무리 싸도 후보가 아니다.
+        ok = [r for r in rows if snow_qualifies(r.get("winter_snow"))]
+        if not ok:
+            return {"code": None, "name": None,
+                    "why": "설경 조건(시내 적설 2 이상, 또는 2시간 내 설상·설산 조망)을 "
+                           "만족하는 후보가 없습니다.", "row": None}
+        pick = ok[0]
+        ws = pick["winter_snow"]
+        detail = (f"시내 적설 {ws['city']}" if (ws.get("city") or 0) >= 2
+                  else (f"{ws['view_of']} 조망 {ws['view_min']}분"
+                        if ws.get("view_min") is not None
+                        and (ws.get("daytrip_min") is None
+                             or ws["view_min"] <= ws["daytrip_min"])
+                        else f"설상 접근 {ws.get('daytrip_min')}분"))
+        why = (f"설경 조건을 만족하는 후보 중 총예산이 가장 낮습니다 ({detail}). "
+               f"제외된 후보는 눈이 없거나 2시간 안에 닿지 않습니다.")
+        return {"code": pick["code"], "name": pick["name"], "why": why, "row": pick}
     if prefer == "budget":
         pick = rows[0]
         why = "총예산이 가장 낮습니다."

@@ -334,9 +334,34 @@ def test_missing_snow_data_is_dropped_not_assumed():
     assert ("XXX", "시내 적설 미상 < 1") in dropped
 
 
-def test_snow_label_keeps_city_and_daytrip_separate():
+def test_snow_label_keeps_axes_separate():
     assert rank_mod.snow_label({"city": 3, "daytrip_min": 0}) == "시내 3"
-    assert rank_mod.snow_label({"city": 1, "daytrip_min": 90}) == "시내 1 · 당일 90분"
-    assert rank_mod.snow_label({"city": 0, "daytrip_min": 140}) == "당일 140분"
+    assert rank_mod.snow_label({"city": 1, "daytrip_min": 90}) == "시내 1 · 밟기 90분"
+    assert rank_mod.snow_label({"city": 0, "daytrip_min": 140}) == "밟기 140분"
     assert rank_mod.snow_label({"city": 0, "daytrip_min": None}) == "없음"
     assert rank_mod.snow_label(None) == "—"
+
+
+def test_snow_label_shows_whichever_is_nearer():
+    """도쿄는 눈을 밟으러 120분이지만 후지산은 90분에 본다 — 가까운 쪽을 보인다."""
+    tokyo = {"city": 1, "daytrip_min": 120, "view_min": 90}
+    assert rank_mod.snow_label(tokyo) == "시내 1 · 조망 90분"
+    nagoya = {"city": 0, "daytrip_min": 140, "view_min": 150}
+    assert rank_mod.snow_label(nagoya) == "밟기 140분"
+    view_only = {"city": 0, "daytrip_min": None, "view_min": 150}
+    assert rank_mod.snow_label(view_only) == "조망 150분"
+
+
+def test_view_filter_keeps_fuji_style_destinations():
+    """설산 조망은 city로도 daytrip으로도 안 잡힌다 — 후지산이 그 경우다."""
+    dests = {
+        "NRT": {"name": "도쿄", "winter_snow": {"city": 1, "daytrip_min": 120,
+                                                "view_min": 90}},
+        "NGO": {"name": "나고야", "winter_snow": {"city": 0, "daytrip_min": 140,
+                                                 "view_min": 150}},
+        "OKA": {"name": "오키나와", "winter_snow": {"city": 0, "daytrip_min": None,
+                                                  "view_min": None}},
+    }
+    kept, dropped = explore_main.filter_by_snow(dests, max_view=120)
+    assert sorted(kept) == ["NRT"]
+    assert ("OKA", "설산 조망 없음 > 120분") in dropped

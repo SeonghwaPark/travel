@@ -439,3 +439,55 @@ def test_representative_already_matches_requested_nights():
     fare = next(i for i in res["rows"][0]["budget"]["items"]
                 if i["label"] == "항공권")
     assert fare["amount"] == 1400000
+
+
+# ── 설경 추천 ──
+#
+# 탐색은 설경 축으로 후보를 걸러 놓고, 브리프는 그걸 모른 채 아이 적합도로
+# 도쿄를 추천했다. 후보 목록은 목표에 맞는데 하나를 고르는 단계에서 목표를 잊었다.
+
+SNOW = {
+    "CTS": {"city": 3, "daytrip_min": 0, "view_min": 0, "view_of": "모이와"},
+    "NRT": {"city": 1, "daytrip_min": 120, "view_min": 90, "view_of": "후지산"},
+    "OKA": {"city": 0, "daytrip_min": None, "view_min": None, "view_of": None},
+}
+
+
+def test_snow_qualifies_accepts_lying_snow_or_reachable_snow():
+    assert compose.snow_qualifies(SNOW["CTS"])
+    assert compose.snow_qualifies(SNOW["NRT"])     # 후지산 조망 90분
+    assert not compose.snow_qualifies(SNOW["OKA"])
+    assert not compose.snow_qualifies(None)
+
+
+def test_snow_qualifies_respects_the_time_limit():
+    far = {"city": 0, "daytrip_min": 300, "view_min": 400}
+    assert not compose.snow_qualifies(far, max_min=120)
+    assert compose.snow_qualifies(far, max_min=400)
+
+
+def test_recommend_snow_skips_cheaper_destination_without_snow():
+    """오키나와가 더 싸도 눈이 없으면 후보가 아니다."""
+    rows = [
+        {"code": "OKA", "name": "오키나와", "winter_snow": SNOW["OKA"],
+         "budget": {"total": 4133300}, "family_score": 4},
+        {"code": "NRT", "name": "도쿄", "winter_snow": SNOW["NRT"],
+         "budget": {"total": 4540122}, "family_score": 5},
+    ]
+    rec = compose.recommend(rows, "snow")
+    assert rec["code"] == "NRT"
+    assert "후지산 조망 90분" in rec["why"]
+
+
+def test_recommend_snow_says_so_when_nothing_qualifies():
+    rows = [{"code": "OKA", "name": "오키나와", "winter_snow": SNOW["OKA"],
+             "budget": {"total": 4133300}, "family_score": 4}]
+    rec = compose.recommend(rows, "snow")
+    assert rec["code"] is None
+    assert "만족하는 후보가 없습니다" in rec["why"]
+
+
+def test_build_attaches_snow_axis_to_rows():
+    res = compose.build(["AAA"], PROFILES, {"AAA": _flight("AAA", 1000000)}, {},
+                        2, 1, 6, snow={"AAA": SNOW["CTS"]})
+    assert res["rows"][0]["winter_snow"]["city"] == 3
