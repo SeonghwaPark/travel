@@ -260,6 +260,29 @@ def _month_of(date_str):
         return None
 
 
+def fare_for_nights(flight, nights):
+    """스캔 결과에서 '요청한 박수'의 최저가를 고른다. 없으면 None.
+
+    스캔의 대표값(best_price)은 5·6·7박을 통틀어 가장 싼 값이라 요청 박수와
+    다를 수 있다. 그대로 쓰면 7박 항공권에 6박 숙박을 더하게 되고, 실재하지
+    않는 여행의 총예산이 나온다. 표는 멀쩡해 보이는데 합계가 조용히 틀린다.
+
+    없는 박수를 다른 박수로 때우지 않는다 — 그건 없는 정밀도를 지어내는 것이다.
+    """
+    if flight.get("nights") == nights:
+        return {"best_price": flight["best_price"],
+                "departure_date": flight.get("departure_date"),
+                "return_date": flight.get("return_date"),
+                "nights": nights}
+    same = [p for p in (flight.get("date_curve") or [])
+            if p.get("nights") == nights and p.get("price") is not None]
+    if not same:
+        return None
+    b = min(same, key=lambda p: p["price"])
+    return {"best_price": b["price"], "departure_date": b.get("departure_date"),
+            "return_date": b.get("return_date"), "nights": nights}
+
+
 def build(candidates, profiles, flights, stays, adults, children,
           nights, transport_costs=None, quotes=None, today=None):
     """후보별 예산·적합도를 계산해 총액 오름차순으로 돌려준다."""
@@ -282,6 +305,12 @@ def build(candidates, profiles, flights, stays, adults, children,
                             f"인원 불일치 (스캔 {flight['party'][0]}성인"
                             f"{flight['party'][1]}소아)"))
             continue
+
+        fare = fare_for_nights(flight, nights)
+        if fare is None:
+            skipped.append((code, f"{nights}박 항공권 결과 없음"))
+            continue
+        flight = {**flight, **fare}
 
         stay = stays.get(code)
         quote = match_quote(quotes or [], code, flight.get("departure_date"),

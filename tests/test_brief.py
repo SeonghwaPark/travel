@@ -384,3 +384,58 @@ def test_markdown_warns_when_tiers_overlap():
                            compose.recommend(result["rows"], "balanced"))
     assert "순위를 확정할 수 없다" in md
     assert "~" in md   # 범위 열
+
+
+# ── 박수 정합 ──
+#
+# 스캔의 대표값(best_price)은 5·6·7박을 통틀어 가장 싼 값이라 요청 박수와 다를 수
+# 있다. 그대로 쓰면 7박 항공권에 6박 숙박을 더한 '실재하지 않는 여행'의 총예산이
+# 나온다. 표는 멀쩡해 보이는데 합계가 조용히 틀린다.
+
+def _flight_multi(code, party=(2, 1)):
+    """5·6·7박이 모두 있는 스캔 결과. 대표값은 가장 싼 7박."""
+    curve = [
+        {"departure_date": "2027-01-05", "return_date": "2027-01-10",
+         "nights": 5, "price": 1500000},
+        {"departure_date": "2027-01-06", "return_date": "2027-01-12",
+         "nights": 6, "price": 1400000},
+        {"departure_date": "2027-01-07", "return_date": "2027-01-14",
+         "nights": 7, "price": 1000000},
+    ]
+    return {"code": code, "best_price": 1000000, "departure_date": "2027-01-07",
+            "return_date": "2027-01-14", "nights": 7, "party": party,
+            "scanned_at": "2026-08-18 11:00:00", "date_curve": curve}
+
+
+def test_flight_uses_requested_nights_not_overall_best():
+    res = compose.build(["AAA"], PROFILES, {"AAA": _flight_multi("AAA")}, {},
+                        2, 1, 6)
+    row = res["rows"][0]
+    fare = next(i for i in row["budget"]["items"] if i["label"] == "항공권")
+    assert fare["amount"] == 1400000          # 7박의 1,000,000원이 아니다
+    assert row["flight"]["nights"] == 6
+    assert row["flight"]["departure_date"] == "2027-01-06"
+    assert row["flight"]["return_date"] == "2027-01-12"
+
+
+def test_missing_requested_nights_skips_candidate():
+    """요청 박수 결과가 없으면 다른 박수로 때우지 않고 후보에서 뺀다."""
+    f = _flight_multi("AAA")
+    f["date_curve"] = [p for p in f["date_curve"] if p["nights"] == 5]
+    f.update(best_price=1500000, departure_date="2027-01-05",
+             return_date="2027-01-10", nights=5)
+    res = compose.build(["AAA"], PROFILES, {"AAA": f}, {}, 2, 1, 6)
+    assert res["rows"] == []
+    assert res["skipped"] == [("AAA", "6박 항공권 결과 없음")]
+
+
+def test_representative_already_matches_requested_nights():
+    """대표값이 이미 요청 박수면 date_curve 없이도 그대로 쓴다."""
+    f = _flight_multi("AAA")
+    del f["date_curve"]
+    f.update(best_price=1400000, departure_date="2027-01-06",
+             return_date="2027-01-12", nights=6)
+    res = compose.build(["AAA"], PROFILES, {"AAA": f}, {}, 2, 1, 6)
+    fare = next(i for i in res["rows"][0]["budget"]["items"]
+                if i["label"] == "항공권")
+    assert fare["amount"] == 1400000
