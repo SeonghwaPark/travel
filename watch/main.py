@@ -125,7 +125,8 @@ def run():
             print(f"  결과 없음 — 건너뜀 ({w['id']})")
             continue
 
-        reasons = rules.evaluate(best["price"], history, w["alert"])
+        reasons = rules.evaluate(best["price"], history, w["alert"],
+                                 baseline=w.get("baseline"))
         med_note = f" (관측 {len(history)}회 누적)" if history else " (첫 관측 — 기준선 생성)"
         leg = ""
         if best.get("duration"):

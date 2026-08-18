@@ -1,10 +1,15 @@
 """알림 판정 규칙.
 
-특가로 볼 조건 4가지 — 하나라도 걸리면 알린다.
+특가로 볼 조건 5가지 — 하나라도 걸리면 알린다.
   target   : 목표가 이하로 떨어짐
   drop     : 직전 관측 대비 N% 이상 하락
   atl      : 역대 최저가 경신
   discount : 평소 시세(과거 중앙값) 대비 N% 이상 저렴
+  baseline : 확정안 실측가보다 싸짐
+
+baseline이 나머지와 다른 점은 기준이 '과거 관측'이 아니라 '내가 사려던 값'이라는
+것이다. 이미 일정을 정한 뒤에는 "역대 최저인가"보다 "내가 본 값보다 싼가"가
+실질적인 질문이다. 예약 전까지 그 질문에 답하라고 둔다.
 """
 
 import statistics
@@ -15,8 +20,11 @@ def _median_price(history):
     return statistics.median(prices) if len(prices) >= 3 else None
 
 
-def evaluate(best_price, history, alert_cfg):
-    """알림 사유 목록을 돌려준다. 빈 리스트면 알리지 않는다."""
+def evaluate(best_price, history, alert_cfg, baseline=None):
+    """알림 사유 목록을 돌려준다. 빈 리스트면 알리지 않는다.
+
+    baseline: 확정안의 실측가. {"price": N, ...} 형태이며 없으면 이 규칙은 건너뛴다.
+    """
     if not best_price:
         return []
 
@@ -61,6 +69,17 @@ def evaluate(best_price, history, alert_cfg):
             reasons.append({
                 "type": "discount",
                 "text": f"🔥 평소 시세 대비 {off:.0f}% 저렴 — 중앙값 {int(med):,}원 → {best_price:,}원",
+            })
+
+    base = (baseline or {}).get("price")
+    base_pct = alert_cfg.get("baseline_pct", 2)
+    if base and best_price < base:
+        off = (base - best_price) / base * 100
+        if off >= base_pct:
+            reasons.append({
+                "type": "baseline",
+                "text": (f"✅ 확정안({base:,}원)보다 {off:.1f}% 저렴 — "
+                         f"{best_price:,}원 · {base - best_price:,}원 절약"),
             })
 
     return reasons
