@@ -15,6 +15,40 @@
   },
   "watches": [
     {
+      "id": "kanazawa-jan2027",
+      "label": "가나자와 2027년 1월 말 (고마쓰공항) — 설경 최유력",
+      "_why": "2026-08-18 설경 필터 탐색에서 시내 적설 2 이상 후보 중 총예산 최저(4,031,000원). 항공권 1,109,000원은 가격 그래프 수치라 실측 확인이 필요하다. 7박이 5·6박보다 싸다는 것도 실제 조회로 되짚어야 한다.",
+      "dest": "KMQ",
+      "date_from": "2027-01-20",
+      "date_to": "2027-02-10",
+      "nights": [7],
+      "adults": 2,
+      "children": 1,
+      "max_queries": 22,
+      "alert": {
+        "target_price": 1050000,
+        "drop_pct": 7,
+        "all_time_low": true
+      }
+    },
+    {
+      "id": "tokyo-feb2027",
+      "label": "도쿄 2027년 2월 중순 — 후지산 조망",
+      "_why": "설경 후보 중 항공권이 가장 싸다(1,060,122원). 시내 적설은 1이라 눈을 밟는 여행은 아니고 후지산 조망(하코네·가와구치코 90분)이 축이다. 겨울이 후지산 조망 연중 최적기다.",
+      "dest": "NRT",
+      "date_from": "2027-02-01",
+      "date_to": "2027-02-21",
+      "nights": [7],
+      "adults": 2,
+      "children": 1,
+      "max_queries": 21,
+      "alert": {
+        "target_price": 1000000,
+        "drop_pct": 7,
+        "all_time_low": true
+      }
+    },
+    {
       "id": "sapporo-feb2027",
       "label": "삿포로 2027년 2월 가족여행",
       "dest": "CTS",
