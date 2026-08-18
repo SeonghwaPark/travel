@@ -121,3 +121,14 @@ def test_all_providers_present_and_labelled():
 def test_adults_never_below_one():
     assert lodging.search_links("삿포로", "2027-02-17", "2027-02-23",
                                 adults=0)["adults"] == 1
+
+
+def test_stay_city_overrides_airport_town():
+    """'고마쓰 (가나자와)'는 공항(도시) 순서라 첫 토큰이 체류 도시가 아니다.
+
+    그 도시로 숙박을 검색하면 엉뚱한 값이 실측으로 저장된다.
+    """
+    from brief import quote
+    assert quote._dest_name("KMQ") == "가나자와"
+    assert quote._dest_name("CTS") == "삿포로"    # 도시(공항) 순서는 그대로
+    assert quote._dest_name("NGO") == "나고야"

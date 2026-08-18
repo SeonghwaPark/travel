@@ -1,0 +1,1171 @@
+{
+  "meta": {
+    "origin": "ICN",
+    "start": "2026-09-01",
+    "end": "2027-02-08",
+    "nights": [
+      5,
+      6,
+      7
+    ],
+    "adults": 2,
+    "children": 1,
+    "infants": 0,
+    "scope": "international",
+    "scanned": 1,
+    "scanned_at": "2026-08-18 13:44:56",
+    "price_note": "Google Flights 표시가(왕복, 전체 승객 합계). 실제 결제가는 예약처에서 확인 필요."
+  },
+  "ranking": [
+    {
+      "code": "DXB",
+      "name": "두바이",
+      "country": "아랍에미리트",
+      "best_price": 2447400,
+      "per_person": 815800,
+      "departure_date": "2027-01-22",
+      "return_date": "2027-01-27",
+      "nights": 5,
+      "median_price": 3384600,
+      "dip_pct": 27.7,
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "사막, 겨울 낮 24~26도"
+      },
+      "observed": 483,
+      "date_curve": [
+        {
+          "departure_date": "2026-09-01",
+          "return_date": "2026-09-07",
+          "nights": 6,
+          "price": 3987100,
+          "per_person": 1329033
+        },
+        {
+          "departure_date": "2026-09-02",
+          "return_date": "2026-09-07",
+          "nights": 5,
+          "price": 3987100,
+          "per_person": 1329033
+        },
+        {
+          "departure_date": "2026-09-03",
+          "return_date": "2026-09-08",
+          "nights": 5,
+          "price": 4025100,
+          "per_person": 1341700
+        },
+        {
+          "departure_date": "2026-09-04",
+          "return_date": "2026-09-11",
+          "nights": 7,
+          "price": 4063000,
+          "per_person": 1354333
+        },
+        {
+          "departure_date": "2026-09-05",
+          "return_date": "2026-09-11",
+          "nights": 6,
+          "price": 5345000,
+          "per_person": 1781667
+        },
+        {
+          "departure_date": "2026-09-06",
+          "return_date": "2026-09-12",
+          "nights": 6,
+          "price": 3387000,
+          "per_person": 1129000
+        },
+        {
+          "departure_date": "2026-09-07",
+          "return_date": "2026-09-14",
+          "nights": 7,
+          "price": 3918300,
+          "per_person": 1306100
+        },
+        {
+          "departure_date": "2026-09-08",
+          "return_date": "2026-09-14",
+          "nights": 6,
+          "price": 3987100,
+          "per_person": 1329033
+        },
+        {
+          "departure_date": "2026-09-09",
+          "return_date": "2026-09-14",
+          "nights": 5,
+          "price": 3987100,
+          "per_person": 1329033
+        },
+        {
+          "departure_date": "2026-09-10",
+          "return_date": "2026-09-15",
+          "nights": 5,
+          "price": 3519000,
+          "per_person": 1173000
+        },
+        {
+          "departure_date": "2026-09-11",
+          "return_date": "2026-09-16",
+          "nights": 5,
+          "price": 4063000,
+          "per_person": 1354333
+        },
+        {
+          "departure_date": "2026-09-12",
+          "return_date": "2026-09-19",
+          "nights": 7,
+          "price": 4907800,
+          "per_person": 1635933
+        },
+        {
+          "departure_date": "2026-09-13",
+          "return_date": "2026-09-20",
+          "nights": 7,
+          "price": 2947200,
+          "per_person": 982400
+        },
+        {
+          "departure_date": "2026-09-14",
+          "return_date": "2026-09-21",
+          "nights": 7,
+          "price": 4091800,
+          "per_person": 1363933
+        },
+        {
+          "departure_date": "2026-09-15",
+          "return_date": "2026-09-21",
+          "nights": 6,
+          "price": 4680600,
+          "per_person": 1560200
+        },
+        {
+          "departure_date": "2026-09-16",
+          "return_date": "2026-09-21",
+          "nights": 5,
+          "price": 4351700,
+          "per_person": 1450567
+        },
+        {
+          "departure_date": "2026-09-17",
+          "return_date": "2026-09-22",
+          "nights": 5,
+          "price": 3049800,
+          "per_person": 1016600
+        },
+        {
+          "departure_date": "2026-09-18",
+          "return_date": "2026-09-23",
+          "nights": 5,
+          "price": 4756300,
+          "per_person": 1585433
+        },
+        {
+          "departure_date": "2026-09-19",
+          "return_date": "2026-09-25",
+          "nights": 6,
+          "price": 5085100,
+          "per_person": 1695033
+        },
+        {
+          "departure_date": "2026-09-20",
+          "return_date": "2026-09-27",
+          "nights": 7,
+          "price": 2975100,
+          "per_person": 991700
+        },
+        {
+          "departure_date": "2026-09-21",
+          "return_date": "2026-09-28",
+          "nights": 7,
+          "price": 5045300,
+          "per_person": 1681767
+        },
+        {
+          "departure_date": "2026-09-22",
+          "return_date": "2026-09-29",
+          "nights": 7,
+          "price": 3193800,
+          "per_person": 1064600
+        },
+        {
+          "departure_date": "2026-09-23",
+          "return_date": "2026-09-30",
+          "nights": 7,
+          "price": 4785100,
+          "per_person": 1595033
+        },
+        {
+          "departure_date": "2026-09-24",
+          "return_date": "2026-09-29",
+          "nights": 5,
+          "price": 3377700,
+          "per_person": 1125900
+        },
+        {
+          "departure_date": "2026-09-25",
+          "return_date": "2026-09-30",
+          "nights": 5,
+          "price": 4496400,
+          "per_person": 1498800
+        },
+        {
+          "departure_date": "2026-09-26",
+          "return_date": "2026-10-02",
+          "nights": 6,
+          "price": 4565100,
+          "per_person": 1521700
+        },
+        {
+          "departure_date": "2026-09-27",
+          "return_date": "2026-10-03",
+          "nights": 6,
+          "price": 3192600,
+          "per_person": 1064200
+        },
+        {
+          "departure_date": "2026-09-28",
+          "return_date": "2026-10-05",
+          "nights": 7,
+          "price": 4785100,
+          "per_person": 1595033
+        },
+        {
+          "departure_date": "2026-09-29",
+          "return_date": "2026-10-06",
+          "nights": 7,
+          "price": 3164100,
+          "per_person": 1054700
+        },
+        {
+          "departure_date": "2026-09-30",
+          "return_date": "2026-10-06",
+          "nights": 6,
+          "price": 4680600,
+          "per_person": 1560200
+        },
+        {
+          "departure_date": "2026-10-01",
+          "return_date": "2026-10-06",
+          "nights": 5,
+          "price": 3029100,
+          "per_person": 1009700
+        },
+        {
+          "departure_date": "2026-10-02",
+          "return_date": "2026-10-08",
+          "nights": 6,
+          "price": 3767700,
+          "per_person": 1255900
+        },
+        {
+          "departure_date": "2026-10-03",
+          "return_date": "2026-10-08",
+          "nights": 5,
+          "price": 4072000,
+          "per_person": 1357333
+        },
+        {
+          "departure_date": "2026-10-04",
+          "return_date": "2026-10-11",
+          "nights": 7,
+          "price": 3003900,
+          "per_person": 1001300
+        },
+        {
+          "departure_date": "2026-10-05",
+          "return_date": "2026-10-11",
+          "nights": 6,
+          "price": 2835300,
+          "per_person": 945100
+        },
+        {
+          "departure_date": "2026-10-06",
+          "return_date": "2026-10-11",
+          "nights": 5,
+          "price": 3019800,
+          "per_person": 1006600
+        },
+        {
+          "departure_date": "2026-10-07",
+          "return_date": "2026-10-12",
+          "nights": 5,
+          "price": 4785100,
+          "per_person": 1595033
+        },
+        {
+          "departure_date": "2026-10-08",
+          "return_date": "2026-10-15",
+          "nights": 7,
+          "price": 4063800,
+          "per_person": 1354600
+        },
+        {
+          "departure_date": "2026-10-09",
+          "return_date": "2026-10-15",
+          "nights": 6,
+          "price": 4677400,
+          "per_person": 1559133
+        },
+        {
+          "departure_date": "2026-10-10",
+          "return_date": "2026-10-17",
+          "nights": 7,
+          "price": 3073800,
+          "per_person": 1024600
+        },
+        {
+          "departure_date": "2026-10-11",
+          "return_date": "2026-10-17",
+          "nights": 6,
+          "price": 2844300,
+          "per_person": 948100
+        },
+        {
+          "departure_date": "2026-10-12",
+          "return_date": "2026-10-17",
+          "nights": 5,
+          "price": 2736000,
+          "per_person": 912000
+        },
+        {
+          "departure_date": "2026-10-13",
+          "return_date": "2026-10-20",
+          "nights": 7,
+          "price": 2959800,
+          "per_person": 986600
+        },
+        {
+          "departure_date": "2026-10-14",
+          "return_date": "2026-10-20",
+          "nights": 6,
+          "price": 3800900,
+          "per_person": 1266967
+        },
+        {
+          "departure_date": "2026-10-15",
+          "return_date": "2026-10-20",
+          "nights": 5,
+          "price": 2973900,
+          "per_person": 991300
+        },
+        {
+          "departure_date": "2026-10-16",
+          "return_date": "2026-10-22",
+          "nights": 6,
+          "price": 4685400,
+          "per_person": 1561800
+        },
+        {
+          "departure_date": "2026-10-17",
+          "return_date": "2026-10-24",
+          "nights": 7,
+          "price": 3003900,
+          "per_person": 1001300
+        },
+        {
+          "departure_date": "2026-10-18",
+          "return_date": "2026-10-24",
+          "nights": 6,
+          "price": 2796000,
+          "per_person": 932000
+        },
+        {
+          "departure_date": "2026-10-19",
+          "return_date": "2026-10-24",
+          "nights": 5,
+          "price": 2796000,
+          "per_person": 932000
+        },
+        {
+          "departure_date": "2026-10-20",
+          "return_date": "2026-10-27",
+          "nights": 7,
+          "price": 3058500,
+          "per_person": 1019500
+        },
+        {
+          "departure_date": "2026-10-21",
+          "return_date": "2026-10-26",
+          "nights": 5,
+          "price": 4611800,
+          "per_person": 1537267
+        },
+        {
+          "departure_date": "2026-10-22",
+          "return_date": "2026-10-27",
+          "nights": 5,
+          "price": 2901900,
+          "per_person": 967300
+        },
+        {
+          "departure_date": "2026-10-23",
+          "return_date": "2026-10-28",
+          "nights": 5,
+          "price": 4220600,
+          "per_person": 1406867
+        },
+        {
+          "departure_date": "2026-10-24",
+          "return_date": "2026-10-31",
+          "nights": 7,
+          "price": 3430500,
+          "per_person": 1143500
+        },
+        {
+          "departure_date": "2026-10-25",
+          "return_date": "2026-11-01",
+          "nights": 7,
+          "price": 3174900,
+          "per_person": 1058300
+        },
+        {
+          "departure_date": "2026-10-26",
+          "return_date": "2026-11-01",
+          "nights": 6,
+          "price": 3174900,
+          "per_person": 1058300
+        },
+        {
+          "departure_date": "2026-10-27",
+          "return_date": "2026-11-03",
+          "nights": 7,
+          "price": 2973900,
+          "per_person": 991300
+        },
+        {
+          "departure_date": "2026-10-28",
+          "return_date": "2026-11-03",
+          "nights": 6,
+          "price": 2808000,
+          "per_person": 936000
+        },
+        {
+          "departure_date": "2026-10-29",
+          "return_date": "2026-11-05",
+          "nights": 7,
+          "price": 2922600,
+          "per_person": 974200
+        },
+        {
+          "departure_date": "2026-10-30",
+          "return_date": "2026-11-05",
+          "nights": 6,
+          "price": 2799600,
+          "per_person": 933200
+        },
+        {
+          "departure_date": "2026-10-31",
+          "return_date": "2026-11-07",
+          "nights": 7,
+          "price": 2941200,
+          "per_person": 980400
+        },
+        {
+          "departure_date": "2026-11-01",
+          "return_date": "2026-11-07",
+          "nights": 6,
+          "price": 2793300,
+          "per_person": 931100
+        },
+        {
+          "departure_date": "2026-11-02",
+          "return_date": "2026-11-07",
+          "nights": 5,
+          "price": 3246600,
+          "per_person": 1082200
+        },
+        {
+          "departure_date": "2026-11-03",
+          "return_date": "2026-11-08",
+          "nights": 5,
+          "price": 3004800,
+          "per_person": 1001600
+        },
+        {
+          "departure_date": "2026-11-04",
+          "return_date": "2026-11-10",
+          "nights": 6,
+          "price": 3437700,
+          "per_person": 1145900
+        },
+        {
+          "departure_date": "2026-11-05",
+          "return_date": "2026-11-12",
+          "nights": 7,
+          "price": 2880900,
+          "per_person": 960300
+        },
+        {
+          "departure_date": "2026-11-06",
+          "return_date": "2026-11-12",
+          "nights": 6,
+          "price": 3209700,
+          "per_person": 1069900
+        },
+        {
+          "departure_date": "2026-11-07",
+          "return_date": "2026-11-14",
+          "nights": 7,
+          "price": 2793300,
+          "per_person": 931100
+        },
+        {
+          "departure_date": "2026-11-08",
+          "return_date": "2026-11-15",
+          "nights": 7,
+          "price": 2865300,
+          "per_person": 955100
+        },
+        {
+          "departure_date": "2026-11-09",
+          "return_date": "2026-11-15",
+          "nights": 6,
+          "price": 2884800,
+          "per_person": 961600
+        },
+        {
+          "departure_date": "2026-11-10",
+          "return_date": "2026-11-15",
+          "nights": 5,
+          "price": 2865300,
+          "per_person": 955100
+        },
+        {
+          "departure_date": "2026-11-11",
+          "return_date": "2026-11-18",
+          "nights": 7,
+          "price": 2884200,
+          "per_person": 961400
+        },
+        {
+          "departure_date": "2026-11-12",
+          "return_date": "2026-11-18",
+          "nights": 6,
+          "price": 2629200,
+          "per_person": 876400
+        },
+        {
+          "departure_date": "2026-11-13",
+          "return_date": "2026-11-18",
+          "nights": 5,
+          "price": 2932200,
+          "per_person": 977400
+        },
+        {
+          "departure_date": "2026-11-14",
+          "return_date": "2026-11-21",
+          "nights": 7,
+          "price": 2998800,
+          "per_person": 999600
+        },
+        {
+          "departure_date": "2026-11-15",
+          "return_date": "2026-11-22",
+          "nights": 7,
+          "price": 2675400,
+          "per_person": 891800
+        },
+        {
+          "departure_date": "2026-11-16",
+          "return_date": "2026-11-22",
+          "nights": 6,
+          "price": 3131400,
+          "per_person": 1043800
+        },
+        {
+          "departure_date": "2026-11-17",
+          "return_date": "2026-11-22",
+          "nights": 5,
+          "price": 2630400,
+          "per_person": 876800
+        },
+        {
+          "departure_date": "2026-11-18",
+          "return_date": "2026-11-24",
+          "nights": 6,
+          "price": 2976900,
+          "per_person": 992300
+        },
+        {
+          "departure_date": "2026-11-19",
+          "return_date": "2026-11-24",
+          "nights": 5,
+          "price": 2632800,
+          "per_person": 877600
+        },
+        {
+          "departure_date": "2026-11-20",
+          "return_date": "2026-11-26",
+          "nights": 6,
+          "price": 3290800,
+          "per_person": 1096933
+        },
+        {
+          "departure_date": "2026-11-21",
+          "return_date": "2026-11-26",
+          "nights": 5,
+          "price": 2998800,
+          "per_person": 999600
+        },
+        {
+          "departure_date": "2026-11-22",
+          "return_date": "2026-11-29",
+          "nights": 7,
+          "price": 3112800,
+          "per_person": 1037600
+        },
+        {
+          "departure_date": "2026-11-23",
+          "return_date": "2026-11-30",
+          "nights": 7,
+          "price": 3290800,
+          "per_person": 1096933
+        },
+        {
+          "departure_date": "2026-11-24",
+          "return_date": "2026-11-29",
+          "nights": 5,
+          "price": 3071400,
+          "per_person": 1023800
+        },
+        {
+          "departure_date": "2026-11-25",
+          "return_date": "2026-12-02",
+          "nights": 7,
+          "price": 3246900,
+          "per_person": 1082300
+        },
+        {
+          "departure_date": "2026-11-26",
+          "return_date": "2026-12-02",
+          "nights": 6,
+          "price": 2808300,
+          "per_person": 936100
+        },
+        {
+          "departure_date": "2026-11-27",
+          "return_date": "2026-12-02",
+          "nights": 5,
+          "price": 2976300,
+          "per_person": 992100
+        },
+        {
+          "departure_date": "2026-11-28",
+          "return_date": "2026-12-03",
+          "nights": 5,
+          "price": 3210000,
+          "per_person": 1070000
+        },
+        {
+          "departure_date": "2026-11-29",
+          "return_date": "2026-12-04",
+          "nights": 5,
+          "price": 3546500,
+          "per_person": 1182167
+        },
+        {
+          "departure_date": "2026-11-30",
+          "return_date": "2026-12-07",
+          "nights": 7,
+          "price": 3599400,
+          "per_person": 1199800
+        },
+        {
+          "departure_date": "2026-12-01",
+          "return_date": "2026-12-07",
+          "nights": 6,
+          "price": 3228300,
+          "per_person": 1076100
+        },
+        {
+          "departure_date": "2026-12-02",
+          "return_date": "2026-12-07",
+          "nights": 5,
+          "price": 2881800,
+          "per_person": 960600
+        },
+        {
+          "departure_date": "2026-12-03",
+          "return_date": "2026-12-08",
+          "nights": 5,
+          "price": 2884800,
+          "per_person": 961600
+        },
+        {
+          "departure_date": "2026-12-04",
+          "return_date": "2026-12-09",
+          "nights": 5,
+          "price": 2929800,
+          "per_person": 976600
+        },
+        {
+          "departure_date": "2026-12-05",
+          "return_date": "2026-12-10",
+          "nights": 5,
+          "price": 3344700,
+          "per_person": 1114900
+        },
+        {
+          "departure_date": "2026-12-06",
+          "return_date": "2026-12-11",
+          "nights": 5,
+          "price": 3529200,
+          "per_person": 1176400
+        },
+        {
+          "departure_date": "2026-12-07",
+          "return_date": "2026-12-14",
+          "nights": 7,
+          "price": 3477300,
+          "per_person": 1159100
+        },
+        {
+          "departure_date": "2026-12-08",
+          "return_date": "2026-12-14",
+          "nights": 6,
+          "price": 3715800,
+          "per_person": 1238600
+        },
+        {
+          "departure_date": "2026-12-09",
+          "return_date": "2026-12-14",
+          "nights": 5,
+          "price": 3435900,
+          "per_person": 1145300
+        },
+        {
+          "departure_date": "2026-12-10",
+          "return_date": "2026-12-15",
+          "nights": 5,
+          "price": 3489300,
+          "per_person": 1163100
+        },
+        {
+          "departure_date": "2026-12-11",
+          "return_date": "2026-12-16",
+          "nights": 5,
+          "price": 3354300,
+          "per_person": 1118100
+        },
+        {
+          "departure_date": "2026-12-12",
+          "return_date": "2026-12-17",
+          "nights": 5,
+          "price": 3598200,
+          "per_person": 1199400
+        },
+        {
+          "departure_date": "2026-12-13",
+          "return_date": "2026-12-19",
+          "nights": 6,
+          "price": 3820500,
+          "per_person": 1273500
+        },
+        {
+          "departure_date": "2026-12-14",
+          "return_date": "2026-12-21",
+          "nights": 7,
+          "price": 3384600,
+          "per_person": 1128200
+        },
+        {
+          "departure_date": "2026-12-15",
+          "return_date": "2026-12-21",
+          "nights": 6,
+          "price": 3384600,
+          "per_person": 1128200
+        },
+        {
+          "departure_date": "2026-12-16",
+          "return_date": "2026-12-23",
+          "nights": 7,
+          "price": 3765300,
+          "per_person": 1255100
+        },
+        {
+          "departure_date": "2026-12-17",
+          "return_date": "2026-12-23",
+          "nights": 6,
+          "price": 3834300,
+          "per_person": 1278100
+        },
+        {
+          "departure_date": "2026-12-18",
+          "return_date": "2026-12-23",
+          "nights": 5,
+          "price": 3918300,
+          "per_person": 1306100
+        },
+        {
+          "departure_date": "2026-12-19",
+          "return_date": "2026-12-25",
+          "nights": 6,
+          "price": 4254700,
+          "per_person": 1418233
+        },
+        {
+          "departure_date": "2026-12-20",
+          "return_date": "2026-12-25",
+          "nights": 5,
+          "price": 4041300,
+          "per_person": 1347100
+        },
+        {
+          "departure_date": "2026-12-21",
+          "return_date": "2026-12-28",
+          "nights": 7,
+          "price": 3951600,
+          "per_person": 1317200
+        },
+        {
+          "departure_date": "2026-12-22",
+          "return_date": "2026-12-29",
+          "nights": 7,
+          "price": 3949200,
+          "per_person": 1316400
+        },
+        {
+          "departure_date": "2026-12-23",
+          "return_date": "2026-12-30",
+          "nights": 7,
+          "price": 3769200,
+          "per_person": 1256400
+        },
+        {
+          "departure_date": "2026-12-24",
+          "return_date": "2026-12-31",
+          "nights": 7,
+          "price": 3845700,
+          "per_person": 1281900
+        },
+        {
+          "departure_date": "2026-12-25",
+          "return_date": "2026-12-31",
+          "nights": 6,
+          "price": 3342300,
+          "per_person": 1114100
+        },
+        {
+          "departure_date": "2026-12-26",
+          "return_date": "2026-12-31",
+          "nights": 5,
+          "price": 3521400,
+          "per_person": 1173800
+        },
+        {
+          "departure_date": "2026-12-27",
+          "return_date": "2027-01-01",
+          "nights": 5,
+          "price": 3521400,
+          "per_person": 1173800
+        },
+        {
+          "departure_date": "2026-12-28",
+          "return_date": "2027-01-04",
+          "nights": 7,
+          "price": 3522900,
+          "per_person": 1174300
+        },
+        {
+          "departure_date": "2026-12-29",
+          "return_date": "2027-01-05",
+          "nights": 7,
+          "price": 3506100,
+          "per_person": 1168700
+        },
+        {
+          "departure_date": "2026-12-30",
+          "return_date": "2027-01-06",
+          "nights": 7,
+          "price": 3365400,
+          "per_person": 1121800
+        },
+        {
+          "departure_date": "2026-12-31",
+          "return_date": "2027-01-07",
+          "nights": 7,
+          "price": 3528000,
+          "per_person": 1176000
+        },
+        {
+          "departure_date": "2027-01-01",
+          "return_date": "2027-01-07",
+          "nights": 6,
+          "price": 3215100,
+          "per_person": 1071700
+        },
+        {
+          "departure_date": "2027-01-02",
+          "return_date": "2027-01-08",
+          "nights": 6,
+          "price": 4237600,
+          "per_person": 1412533
+        },
+        {
+          "departure_date": "2027-01-03",
+          "return_date": "2027-01-08",
+          "nights": 5,
+          "price": 4041300,
+          "per_person": 1347100
+        },
+        {
+          "departure_date": "2027-01-04",
+          "return_date": "2027-01-11",
+          "nights": 7,
+          "price": 3854100,
+          "per_person": 1284700
+        },
+        {
+          "departure_date": "2027-01-05",
+          "return_date": "2027-01-11",
+          "nights": 6,
+          "price": 3804900,
+          "per_person": 1268300
+        },
+        {
+          "departure_date": "2027-01-06",
+          "return_date": "2027-01-11",
+          "nights": 5,
+          "price": 3384600,
+          "per_person": 1128200
+        },
+        {
+          "departure_date": "2027-01-07",
+          "return_date": "2027-01-13",
+          "nights": 6,
+          "price": 3630900,
+          "per_person": 1210300
+        },
+        {
+          "departure_date": "2027-01-08",
+          "return_date": "2027-01-13",
+          "nights": 5,
+          "price": 3370800,
+          "per_person": 1123600
+        },
+        {
+          "departure_date": "2027-01-09",
+          "return_date": "2027-01-14",
+          "nights": 5,
+          "price": 3521400,
+          "per_person": 1173800
+        },
+        {
+          "departure_date": "2027-01-10",
+          "return_date": "2027-01-17",
+          "nights": 7,
+          "price": 3420000,
+          "per_person": 1140000
+        },
+        {
+          "departure_date": "2027-01-11",
+          "return_date": "2027-01-18",
+          "nights": 7,
+          "price": 3162300,
+          "per_person": 1054100
+        },
+        {
+          "departure_date": "2027-01-12",
+          "return_date": "2027-01-18",
+          "nights": 6,
+          "price": 3121200,
+          "per_person": 1040400
+        },
+        {
+          "departure_date": "2027-01-13",
+          "return_date": "2027-01-18",
+          "nights": 5,
+          "price": 3121200,
+          "per_person": 1040400
+        },
+        {
+          "departure_date": "2027-01-14",
+          "return_date": "2027-01-19",
+          "nights": 5,
+          "price": 3089700,
+          "per_person": 1029900
+        },
+        {
+          "departure_date": "2027-01-15",
+          "return_date": "2027-01-22",
+          "nights": 7,
+          "price": 2594700,
+          "per_person": 864900
+        },
+        {
+          "departure_date": "2027-01-16",
+          "return_date": "2027-01-22",
+          "nights": 6,
+          "price": 3138600,
+          "per_person": 1046200
+        },
+        {
+          "departure_date": "2027-01-17",
+          "return_date": "2027-01-24",
+          "nights": 7,
+          "price": 3177600,
+          "per_person": 1059200
+        },
+        {
+          "departure_date": "2027-01-18",
+          "return_date": "2027-01-25",
+          "nights": 7,
+          "price": 2694000,
+          "per_person": 898000
+        },
+        {
+          "departure_date": "2027-01-19",
+          "return_date": "2027-01-25",
+          "nights": 6,
+          "price": 2651700,
+          "per_person": 883900
+        },
+        {
+          "departure_date": "2027-01-20",
+          "return_date": "2027-01-25",
+          "nights": 5,
+          "price": 2651700,
+          "per_person": 883900
+        },
+        {
+          "departure_date": "2027-01-21",
+          "return_date": "2027-01-27",
+          "nights": 6,
+          "price": 2576700,
+          "per_person": 858900
+        },
+        {
+          "departure_date": "2027-01-22",
+          "return_date": "2027-01-27",
+          "nights": 5,
+          "price": 2447400,
+          "per_person": 815800
+        },
+        {
+          "departure_date": "2027-01-23",
+          "return_date": "2027-01-30",
+          "nights": 7,
+          "price": 2665500,
+          "per_person": 888500
+        },
+        {
+          "departure_date": "2027-01-24",
+          "return_date": "2027-01-31",
+          "nights": 7,
+          "price": 2621700,
+          "per_person": 873900
+        },
+        {
+          "departure_date": "2027-01-25",
+          "return_date": "2027-01-31",
+          "nights": 6,
+          "price": 2724000,
+          "per_person": 908000
+        },
+        {
+          "departure_date": "2027-01-26",
+          "return_date": "2027-01-31",
+          "nights": 5,
+          "price": 2582400,
+          "per_person": 860800
+        },
+        {
+          "departure_date": "2027-01-27",
+          "return_date": "2027-02-02",
+          "nights": 6,
+          "price": 2583900,
+          "per_person": 861300
+        },
+        {
+          "departure_date": "2027-01-28",
+          "return_date": "2027-02-02",
+          "nights": 5,
+          "price": 2643900,
+          "per_person": 881300
+        },
+        {
+          "departure_date": "2027-01-29",
+          "return_date": "2027-02-05",
+          "nights": 7,
+          "price": 2620200,
+          "per_person": 873400
+        },
+        {
+          "departure_date": "2027-01-30",
+          "return_date": "2027-02-05",
+          "nights": 6,
+          "price": 2647500,
+          "per_person": 882500
+        },
+        {
+          "departure_date": "2027-01-31",
+          "return_date": "2027-02-05",
+          "nights": 5,
+          "price": 2550600,
+          "per_person": 850200
+        },
+        {
+          "departure_date": "2027-02-01",
+          "return_date": "2027-02-07",
+          "nights": 6,
+          "price": 2523000,
+          "per_person": 841000
+        },
+        {
+          "departure_date": "2027-02-02",
+          "return_date": "2027-02-07",
+          "nights": 5,
+          "price": 2583000,
+          "per_person": 861000
+        },
+        {
+          "departure_date": "2027-02-03",
+          "return_date": "2027-02-08",
+          "nights": 5,
+          "price": 2640000,
+          "per_person": 880000
+        },
+        {
+          "departure_date": "2027-02-04",
+          "return_date": "2027-02-11",
+          "nights": 7,
+          "price": 2739600,
+          "per_person": 913200
+        },
+        {
+          "departure_date": "2027-02-05",
+          "return_date": "2027-02-11",
+          "nights": 6,
+          "price": 2710200,
+          "per_person": 903400
+        },
+        {
+          "departure_date": "2027-02-06",
+          "return_date": "2027-02-11",
+          "nights": 5,
+          "price": 2911800,
+          "per_person": 970600
+        },
+        {
+          "departure_date": "2027-02-07",
+          "return_date": "2027-02-14",
+          "nights": 7,
+          "price": 2733000,
+          "per_person": 911000
+        },
+        {
+          "departure_date": "2027-02-08",
+          "return_date": "2027-02-15",
+          "nights": 7,
+          "price": 2888100,
+          "per_person": 962700
+        }
+      ]
+    }
+  ],
+  "failed": []
+}

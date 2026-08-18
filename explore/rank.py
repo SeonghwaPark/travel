@@ -57,6 +57,7 @@ def summarize(dest_code, info, offers_by_nights, pax):
         "median_price": median,
         # 그 목적지 안에서 이 날짜가 얼마나 좋은 타이밍인가 (기간 중앙값 대비)
         "dip_pct": round((median - best["price"]) / median * 100, 1) if median else 0.0,
+        "winter_snow": info.get("winter_snow"),
         "observed": len(prices),
         "date_curve": [by_date[d] for d in sorted(by_date)],
     }
@@ -71,6 +72,62 @@ def rank(summaries):
     """최저가 오름차순. 같은 값이면 기간 중앙값 대비 하락폭이 큰 쪽을 앞에 둔다."""
     return sorted((s for s in summaries if s),
                   key=lambda s: (s["best_price"], -s["dip_pct"]))
+
+
+def lodging_season(code, check_in):
+    """그 목적지·그 날짜에 숙박비가 뛰는가. (배수, 사유) 또는 (1.0, None).
+
+    탐색은 항공권만 보고 순위를 낸다. 그래서 눈축제 기간이 싸 보였다 —
+    항공권은 그대로인데 삿포로 숙박이 1.9배로 뛰는 걸 순위가 몰랐다.
+    순위를 바꾸진 않되 표에 띄워서 사람이 함정을 볼 수 있게 한다.
+    """
+    if not check_in:
+        return 1.0, None
+    try:
+        from brief import compose
+        prof = compose.load_profiles()["destinations"].get(code)
+        if not prof:
+            return 1.0, None
+        s = compose.season_multiplier(prof, check_in)
+        return s.get("factor", 1.0), s.get("reason")
+    except Exception:
+        return 1.0, None
+
+
+def snow_label(ws):
+    """설경 축을 한 칸에 담는다. 값이 없으면 '—'.
+
+    세 축을 한 숫자로 뭉개지 않는다 — 발밑에 눈이 있는 것(city), 눈을 밟으러
+    나가는 것(daytrip_min), 설산을 바라보는 것(view_min)은 서로 다른 여행이다.
+    나고야(시내 0·밟기 140분)와 고마쓰(시내 2)를 같은 점수로 묶으면 안 된다.
+
+    표 한 칸이라 시내 적설에 더해 '가까운 쪽 하나'만 붙인다. 나머지는 JSON에 있다.
+    """
+    if not ws:
+        return "—"
+    city = ws.get("city")
+    if city is None:
+        return "—"
+    if city >= 2:
+        return f"시내 {city}"
+    day, view = ws.get("daytrip_min"), ws.get("view_min")
+    near = None
+    if day is not None and view is not None:
+        near = (f"밟기 {day}분" if day <= view else f"조망 {view}분")
+    elif day is not None:
+        near = f"밟기 {day}분"
+    elif view is not None:
+        near = f"조망 {view}분"
+    if city == 1:
+        return "시내 1" + (f" · {near}" if near else "")
+    return near or "없음"
+
+
+def _season_cell(row):
+    f, why = lodging_season(row.get("code"), row.get("departure_date"))
+    if f == 1.0:
+        return "—"
+    return f"x{f} {why}" if why else f"x{f}"
 
 
 def _won(n):
@@ -107,19 +164,20 @@ def to_markdown(result, contexts=None):
     has_ctx = any(contexts.get(r["code"]) for r in result["ranking"])
     if has_ctx:
         lines += [
-            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 | 과거 스캔 대비 |",
-            "|---|--------|------|-------|------|------|----|------------------|----------------|",
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 숙박 | 기간 중앙값 대비 | 과거 스캔 대비 |",
+            "|---|--------|------|-------|------|------|----|------|------|------------------|----------------|",
         ]
     else:
         lines += [
-            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 |",
-            "|---|--------|------|-------|------|------|----|------------------|",
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 숙박 | 기간 중앙값 대비 |",
+            "|---|--------|------|-------|------|------|----|------|------|------------------|",
         ]
     for i, r in enumerate(result["ranking"], 1):
         dip = f"−{r['dip_pct']}%" if r["dip_pct"] > 0 else "—"
         row = (f"| {i} | {r['name']} ({r['code']}) | {_won(r['best_price'])} | "
                f"{_won(r['per_person'])} | {r['departure_date']} | {r['return_date']} | "
-               f"{r['nights']} | {dip} |")
+               f"{r['nights']} | {snow_label(r.get('winter_snow'))} | "
+               f"{_season_cell(r)} | {dip} |")
         if has_ctx:
             from . import trend as trend_mod
             row += f" {trend_mod.describe(contexts.get(r['code'])) or '—'} |"

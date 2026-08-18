@@ -384,3 +384,143 @@ def test_markdown_warns_when_tiers_overlap():
                            compose.recommend(result["rows"], "balanced"))
     assert "순위를 확정할 수 없다" in md
     assert "~" in md   # 범위 열
+
+
+# ── 박수 정합 ──
+#
+# 스캔의 대표값(best_price)은 5·6·7박을 통틀어 가장 싼 값이라 요청 박수와 다를 수
+# 있다. 그대로 쓰면 7박 항공권에 6박 숙박을 더한 '실재하지 않는 여행'의 총예산이
+# 나온다. 표는 멀쩡해 보이는데 합계가 조용히 틀린다.
+
+def _flight_multi(code, party=(2, 1)):
+    """5·6·7박이 모두 있는 스캔 결과. 대표값은 가장 싼 7박."""
+    curve = [
+        {"departure_date": "2027-01-05", "return_date": "2027-01-10",
+         "nights": 5, "price": 1500000},
+        {"departure_date": "2027-01-06", "return_date": "2027-01-12",
+         "nights": 6, "price": 1400000},
+        {"departure_date": "2027-01-07", "return_date": "2027-01-14",
+         "nights": 7, "price": 1000000},
+    ]
+    return {"code": code, "best_price": 1000000, "departure_date": "2027-01-07",
+            "return_date": "2027-01-14", "nights": 7, "party": party,
+            "scanned_at": "2026-08-18 11:00:00", "date_curve": curve}
+
+
+def test_flight_uses_requested_nights_not_overall_best():
+    res = compose.build(["AAA"], PROFILES, {"AAA": _flight_multi("AAA")}, {},
+                        2, 1, 6)
+    row = res["rows"][0]
+    fare = next(i for i in row["budget"]["items"] if i["label"] == "항공권")
+    assert fare["amount"] == 1400000          # 7박의 1,000,000원이 아니다
+    assert row["flight"]["nights"] == 6
+    assert row["flight"]["departure_date"] == "2027-01-06"
+    assert row["flight"]["return_date"] == "2027-01-12"
+
+
+def test_missing_requested_nights_skips_candidate():
+    """요청 박수 결과가 없으면 다른 박수로 때우지 않고 후보에서 뺀다."""
+    f = _flight_multi("AAA")
+    f["date_curve"] = [p for p in f["date_curve"] if p["nights"] == 5]
+    f.update(best_price=1500000, departure_date="2027-01-05",
+             return_date="2027-01-10", nights=5)
+    res = compose.build(["AAA"], PROFILES, {"AAA": f}, {}, 2, 1, 6)
+    assert res["rows"] == []
+    assert res["skipped"] == [("AAA", "6박 항공권 결과 없음")]
+
+
+def test_representative_already_matches_requested_nights():
+    """대표값이 이미 요청 박수면 date_curve 없이도 그대로 쓴다."""
+    f = _flight_multi("AAA")
+    del f["date_curve"]
+    f.update(best_price=1400000, departure_date="2027-01-06",
+             return_date="2027-01-12", nights=6)
+    res = compose.build(["AAA"], PROFILES, {"AAA": f}, {}, 2, 1, 6)
+    fare = next(i for i in res["rows"][0]["budget"]["items"]
+                if i["label"] == "항공권")
+    assert fare["amount"] == 1400000
+
+
+# ── 설경 추천 ──
+#
+# 탐색은 설경 축으로 후보를 걸러 놓고, 브리프는 그걸 모른 채 아이 적합도로
+# 도쿄를 추천했다. 후보 목록은 목표에 맞는데 하나를 고르는 단계에서 목표를 잊었다.
+
+SNOW = {
+    "CTS": {"city": 3, "daytrip_min": 0, "view_min": 0, "view_of": "모이와"},
+    "NRT": {"city": 1, "daytrip_min": 120, "view_min": 90, "view_of": "후지산"},
+    "OKA": {"city": 0, "daytrip_min": None, "view_min": None, "view_of": None},
+}
+
+
+def test_snow_qualifies_accepts_lying_snow_or_reachable_snow():
+    assert compose.snow_qualifies(SNOW["CTS"])
+    assert compose.snow_qualifies(SNOW["NRT"])     # 후지산 조망 90분
+    assert not compose.snow_qualifies(SNOW["OKA"])
+    assert not compose.snow_qualifies(None)
+
+
+def test_snow_qualifies_respects_the_time_limit():
+    far = {"city": 0, "daytrip_min": 300, "view_min": 400}
+    assert not compose.snow_qualifies(far, max_min=120)
+    assert compose.snow_qualifies(far, max_min=400)
+
+
+def test_recommend_snow_skips_cheaper_destination_without_snow():
+    """오키나와가 더 싸도 눈이 없으면 후보가 아니다."""
+    rows = [
+        {"code": "OKA", "name": "오키나와", "winter_snow": SNOW["OKA"],
+         "budget": {"total": 4133300}, "family_score": 4},
+        {"code": "NRT", "name": "도쿄", "winter_snow": SNOW["NRT"],
+         "budget": {"total": 4540122}, "family_score": 5},
+    ]
+    rec = compose.recommend(rows, "snow")
+    assert rec["code"] == "NRT"
+    assert "후지산 조망 90분" in rec["why"]
+
+
+def test_recommend_snow_says_so_when_nothing_qualifies():
+    rows = [{"code": "OKA", "name": "오키나와", "winter_snow": SNOW["OKA"],
+             "budget": {"total": 4133300}, "family_score": 4}]
+    rec = compose.recommend(rows, "snow")
+    assert rec["code"] is None
+    assert "만족하는 후보가 없습니다" in rec["why"]
+
+
+def test_build_attaches_snow_axis_to_rows():
+    res = compose.build(["AAA"], PROFILES, {"AAA": _flight("AAA", 1000000)}, {},
+                        2, 1, 6, snow={"AAA": SNOW["CTS"]})
+    assert res["rows"][0]["winter_snow"]["city"] == 3
+
+
+def test_flight_band_widens_the_total_range():
+    """항공권을 오차 0으로 두면 그래프가 어긋나는 위험이 표에서 사라진다."""
+    band = {"band": 0.0749, "basis": "이 노선 관측 6건"}
+    b = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                adults=2, children=1, flight_total=1000000,
+                                flight_band=band)
+    fare = next(i for i in b["items"] if i["label"] == "항공권")
+    assert fare["low"] == 925100 and fare["high"] == 1074900
+    assert fare["confidence"] == "medium"
+    assert "최대 7.5% 어긋난 기록" in fare["note"]
+
+
+def test_no_band_keeps_previous_behaviour():
+    b = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                adults=2, children=1, flight_total=1000000)
+    fare = next(i for i in b["items"] if i["label"] == "항공권")
+    assert fare["low"] == fare["high"] == 1000000
+    assert fare["confidence"] == "high"
+
+
+def test_graph_priced_flight_is_not_labelled_measured():
+    """그래프와 실제 조회를 둘 다 '실측'이라 부르면 표에서 구분이 사라진다."""
+    band = {"band": 0.0749, "basis": "이 노선 관측 6건"}
+    b = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                adults=2, children=1, flight_total=1000000,
+                                flight_band=band)
+    assert next(i for i in b["items"] if i["label"] == "항공권")["source"] == "그래프"
+    b0 = compose.estimate_budget(PROFILES["destinations"]["AAA"], nights=6,
+                                 adults=2, children=1, flight_total=1000000,
+                                 flight_band={"band": 0.0, "basis": "관측 없음"})
+    assert next(i for i in b0["items"] if i["label"] == "항공권")["source"] == "실측"

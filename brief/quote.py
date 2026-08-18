@@ -33,7 +33,10 @@ def _dest_name(code):
     if info is None:
         known = ", ".join(sorted({**d["international"], **d["domestic"]}))
         raise SystemExit(f"destinations.json에 없는 목적지: {code} (있는 것: {known})")
-    return info["name"].split()[0]
+    # 이름 규칙이 일정하지 않다. '삿포로 (신치토세)'는 도시(공항)인데
+    # '고마쓰 (가나자와)'는 공항(도시)이라 첫 토큰이 공항 소재 소도시가 된다.
+    # 그 도시로 숙박을 검색하면 엉뚱한 값이 실측으로 저장된다.
+    return info.get("stay_city") or info["name"].split()[0]
 
 
 def cmd_links(a):

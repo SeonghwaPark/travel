@@ -1,0 +1,70 @@
+# 알림 배달 경로만 검증한다.
+#
+# fare-watch는 알림 조건이 걸릴 때만 메시지를 보낸다. 그래서 토큰을 잘못 넣어도
+# "조용한 게 정상"과 구분이 안 된다 — 실제로 조건이 4번 걸리는 동안 시크릿이
+# 비어 있어서 한 통도 도착하지 않았고, 아무도 몰랐다.
+#
+# 이 워크플로는 조건과 무관하게 한 통을 보내 경로가 살아 있는지만 본다.
+# 수동 실행 전용이다.
+name: telegram-test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Send test message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+
+          import requests
+
+          token = os.environ.get("TELEGRAM_BOT_TOKEN")
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+          missing = [k for k, v in (("TELEGRAM_BOT_TOKEN", token),
+                                    ("TELEGRAM_CHAT_ID", chat_id)) if not v]
+          if missing:
+              sys.exit(f"시크릿이 비어 있습니다: {', '.join(missing)}")
+
+          text = "\n".join([
+              "✅ 항공권 감시 알림 연결 완료",
+              "",
+              "이 메시지가 보이면 배달 경로가 살아 있습니다.",
+              "앞으로 특가 조건이 걸릴 때만 알림이 옵니다 — 조용하면 정상입니다.",
+              "",
+              "감시 중",
+              "• 삿포로 1월 7박 (확정 후보) — 목표 1,800,000원",
+              "• 삿포로 2월 6·7박 — 목표 1,400,000원",
+              "• 가나자와 1월 7박 — 목표 1,050,000원",
+              "• 도쿄 2월 7박 — 목표 1,000,000원",
+              "",
+              "하루 2회 (09:00 · 21:00) 자동 조회",
+          ])
+
+          r = requests.post(
+              f"https://api.telegram.org/bot{token}/sendMessage",
+              json={"chat_id": chat_id, "text": text},
+              timeout=20,
+          )
+          body = r.json()
+          if not body.get("ok"):
+              # 토큰·chat id가 틀리면 여기서 사유가 그대로 나온다
+              sys.exit(f"발송 실패 {r.status_code}: {body.get('description')}")
+          print("발송 성공 — 텔레그램을 확인하세요")
+          PY

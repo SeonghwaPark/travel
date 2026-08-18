@@ -142,7 +142,7 @@ def parse_args(argv=None):
     p.add_argument("--adults", type=int, default=2)
     p.add_argument("--children", type=int, default=0)
     p.add_argument("--prefer", default="balanced",
-                   choices=["budget", "family", "balanced"])
+                   choices=["budget", "family", "snow", "balanced"])
     p.add_argument("--tag", default="")
     return p.parse_args(argv)
 

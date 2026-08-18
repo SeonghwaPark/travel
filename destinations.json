@@ -10,119 +10,797 @@
   "international": {
     "NRT": {
       "name": "도쿄 나리타",
-      "country": "일본"
+      "country": "일본",
+      "winter_snow": {
+        "city": 1,
+        "daytrip_min": 120,
+        "view_min": 90,
+        "view_of": "후지산 (하코네·가와구치코)",
+        "note": "도쿄 적설은 연 몇 회. 니가타·닛코 신칸센 120분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "KIX": {
       "name": "오사카 간사이",
-      "country": "일본"
+      "country": "일본",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 90,
+        "view_min": null,
+        "view_of": null,
+        "note": "오사카 시내 적설 거의 없음. 시가현 스키장 90분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "FUK": {
       "name": "후쿠오카",
-      "country": "일본"
+      "country": "일본",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 150,
+        "view_min": null,
+        "view_of": null,
+        "note": "규슈라 시내 적설 드물다. 구주·유후인 150분, 그마저 얕음"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "CTS": {
       "name": "삿포로 (신치토세)",
-      "country": "일본"
+      "country": "일본",
+      "winter_snow": {
+        "city": 3,
+        "daytrip_min": 0,
+        "view_min": 0,
+        "view_of": "데이네·모이와 — 시내에서 보인다",
+        "note": "삿포로 시내가 겨울 내내 눈 속. 2월 최심 중앙구 120cm·남구 160cm"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "HKD": {
       "name": "하코다테",
-      "country": "일본"
+      "country": "일본",
+      "winter_snow": {
+        "city": 3,
+        "daytrip_min": 0,
+        "view_min": 0,
+        "view_of": "고마가타케·하코다테산",
+        "note": "하코다테 시내 적설 두껍다. 홋카이도 남부라 삿포로보다는 얕음"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "OKA": {
       "name": "오키나와 (나하)",
-      "country": "일본"
+      "country": "일본",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "아열대. 눈 없음"
+      },
+      "stay_city": "나하",
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "NGO": {
+      "name": "나고야 (주부)",
+      "country": "일본",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 140,
+        "view_min": 150,
+        "view_of": "기타 알프스 (신호타카 로프웨이)",
+        "note": "나고야 시내는 눈이 거의 안 쌓인다. 다카야마 140분·시라카와고 170분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "AOJ": {
+      "name": "아오모리",
+      "country": "일본",
+      "winter_snow": {
+        "city": 3,
+        "daytrip_min": 0,
+        "view_min": 0,
+        "view_of": "핫코다 연봉 — 시내에서 보인다",
+        "note": "일본 최다 적설 도시권. 핫코다 수빙 60분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "KMQ": {
+      "name": "고마쓰 (가나자와)",
+      "country": "일본",
+      "winter_snow": {
+        "city": 2,
+        "daytrip_min": 75,
+        "view_min": 0,
+        "view_of": "하쿠산 — 맑은 날 시내에서 보인다",
+        "note": "호쿠리쿠 폭설지대, 가나자와 시내도 쌓인다. 시라카와고 버스 75분"
+      },
+      "stay_city": "가나자와",
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "SDJ": {
+      "name": "센다이",
+      "country": "일본",
+      "winter_snow": {
+        "city": 1,
+        "daytrip_min": 90,
+        "view_min": 90,
+        "view_of": "자오 연봉",
+        "note": "센다이 시내는 해안이라 눈이 적다. 자오 수빙 90분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "BKK": {
       "name": "방콕",
-      "country": "태국"
+      "country": "태국",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "SIN": {
       "name": "싱가포르",
-      "country": "싱가포르"
+      "country": "싱가포르",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "적도"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "HKG": {
       "name": "홍콩",
-      "country": "홍콩"
+      "country": "홍콩",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "아열대, 겨울에도 10도 이상"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "TPE": {
       "name": "타이베이",
-      "country": "대만"
+      "country": "대만",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "아열대. 합환산 적설은 있으나 여행 동선 밖"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "KHH": {
       "name": "가오슝",
-      "country": "대만"
+      "country": "대만",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "아열대 남부"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "DAD": {
       "name": "다낭",
-      "country": "베트남"
+      "country": "베트남",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "SGN": {
       "name": "호치민",
-      "country": "베트남"
+      "country": "베트남",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "HAN": {
       "name": "하노이",
-      "country": "베트남"
+      "country": "베트남",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "아열대. 사파 적설은 드물고 300분 이상"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "MNL": {
       "name": "마닐라",
-      "country": "필리핀"
+      "country": "필리핀",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": "필리핀 일부 지역(잠보앙가 반도·술루·바실란·타위타위)에 여행금지가 있으나 마닐라·세부는 해당하지 않는다. 전국 단위 경보는 미확인.",
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "CEB": {
       "name": "세부",
-      "country": "필리핀"
+      "country": "필리핀",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": "필리핀 일부 지역(잠보앙가 반도·술루·바실란·타위타위)에 여행금지가 있으나 마닐라·세부는 해당하지 않는다. 전국 단위 경보는 미확인.",
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "DPS": {
       "name": "발리",
-      "country": "인도네시아"
+      "country": "인도네시아",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "KUL": {
       "name": "쿠알라룸푸르",
-      "country": "말레이시아"
+      "country": "말레이시아",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "적도"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "PNH": {
       "name": "프놈펜",
-      "country": "캄보디아"
+      "country": "캄보디아",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "REP": {
       "name": "시엠립",
-      "country": "캄보디아"
+      "country": "캄보디아",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "BKI": {
+      "name": "코타키나발루",
+      "country": "말레이시아",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "PQC": {
+      "name": "푸꾸옥",
+      "country": "베트남",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "CNX": {
+      "name": "치앙마이",
+      "country": "태국",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "아열대, 건기 서늘하나 눈 없음"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "MLE": {
+      "name": "몰디브 (말레)",
+      "country": "몰디브",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "적도"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "LAX": {
       "name": "로스앤젤레스",
-      "country": "미국"
+      "country": "미국",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 120,
+        "view_min": null,
+        "view_of": null,
+        "note": "시내 눈 없음. 빅베어 120분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "JFK": {
       "name": "뉴욕",
-      "country": "미국"
+      "country": "미국",
+      "winter_snow": {
+        "city": 2,
+        "daytrip_min": 0,
+        "view_min": null,
+        "view_of": null,
+        "note": "1~2월 적설 흔하다. 다만 도시 설경이라 자연 설경과는 다름"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "SFO": {
       "name": "샌프란시스코",
-      "country": "미국"
+      "country": "미국",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 210,
+        "view_min": null,
+        "view_of": null,
+        "note": "시내 눈 없음. 타호 210분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "CDG": {
       "name": "파리",
-      "country": "프랑스"
+      "country": "프랑스",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 240,
+        "view_min": null,
+        "view_of": null,
+        "note": "파리 적설 드물다. 알프스까지 240분 이상"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "LHR": {
       "name": "런던",
-      "country": "영국"
+      "country": "영국",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 240,
+        "view_min": null,
+        "view_of": null,
+        "note": "런던 적설 드물다"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "FCO": {
       "name": "로마",
-      "country": "이탈리아"
+      "country": "이탈리아",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 120,
+        "view_min": null,
+        "view_of": null,
+        "note": "로마 시내 눈 없음. 아펜니노 120분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "BCN": {
       "name": "바르셀로나",
-      "country": "스페인"
+      "country": "스페인",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": 150,
+        "view_min": null,
+        "view_of": null,
+        "note": "바르셀로나 눈 없음. 피레네 150분"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     },
     "SYD": {
       "name": "시드니",
-      "country": "호주"
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "DXB": {
+      "name": "두바이",
+      "country": "아랍에미리트",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "사막, 겨울 낮 24~26도"
+      },
+      "travel_advisory": {
+        "level": 3,
+        "label": "출국권고",
+        "note": "중동 정세 악화. 2026-03-08 발령, 바레인·UAE·오만·카타르·쿠웨이트 등 동시 상향",
+        "checked_at": "2026-08-18",
+        "source": "https://ae.mofa.go.kr/ae-ko/brd/m_11118/view.do?seq=1346407"
+      }
+    },
+    "AUH": {
+      "name": "아부다비",
+      "country": "아랍에미리트",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "사막"
+      },
+      "travel_advisory": {
+        "level": 3,
+        "label": "출국권고",
+        "note": "중동 정세 악화. 2026-03-08 발령",
+        "checked_at": "2026-08-18",
+        "source": "https://ae.mofa.go.kr/ae-ko/brd/m_11118/view.do?seq=1346407"
+      }
+    },
+    "DOH": {
+      "name": "도하",
+      "country": "카타르",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "사막"
+      },
+      "travel_advisory": {
+        "level": 3,
+        "label": "출국권고",
+        "note": "중동 정세 악화. 2026-03-08 발령",
+        "checked_at": "2026-08-18",
+        "source": "https://ae.mofa.go.kr/ae-ko/brd/m_11118/view.do?seq=1346407"
+      }
     },
     "GUM": {
       "name": "괌",
-      "country": "미국"
+      "country": "미국",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "열대"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "BNE": {
+      "name": "브리즈번",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 1~2월은 아열대 우기라 소나기·습도가 높다"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "OOL": {
+      "name": "골드코스트",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 서핑·테마파크, 1~2월 우기"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "MEL": {
+      "name": "멜버른",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 날씨 변덕이 심하기로 유명"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
+    },
+    "CNS": {
+      "name": "케언즈",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 1~2월은 우기·사이클론 시즌이라 그레이트배리어리프 투어가 자주 결항"
+      },
+      "travel_advisory": {
+        "level": null,
+        "label": null,
+        "note": null,
+        "checked_at": null,
+        "source": "https://www.0404.go.kr/"
+      }
     }
   },
   "domestic": {
@@ -174,5 +852,8 @@
       "name": "원주",
       "country": "국내"
     }
-  }
+  },
+  "_winter_snow_note": "winter_snow는 1~2월 기준 설경 축이다. 세 축을 한 숫자로 뭉개지 않는다 — 발밑에 눈이 있는 것, 눈을 밟으러 나가는 것, 설산을 바라보는 것은 서로 다른 여행이다. city = 시내 적설: 0 눈이 안 온다 / 1 드물게·얕게 쌓인다 / 2 겨울 내내 대체로 쌓여 있다 / 3 두껍게 쌓여 여행 전체가 눈 속. daytrip_min = 눈을 밟을 수 있는 곳까지 편도 이동 시간(분), city가 2 이상이면 0, 당일치기가 비현실적이면 null. view_min = 이름난 설산을 조망하는 지점까지 편도 이동 시간(분), 시내에서 보이면 0, 그런 산이 없으면 null. view_of에 무엇을 보는지 적는다. 값은 전부 어림이며 근거는 note에 적는다. 탐색이 목표로 정렬할 수 있게 목적지 목록에 둔다.",
+  "_stay_city_note": "stay_city는 숙박을 검색할 도시다. name의 첫 토큰이 공항 소재지라 실제 체류 도시와 다를 때만 적는다. 없으면 name의 첫 토큰을 쓴다.",
+  "_travel_advisory_note": "travel_advisory는 외교부 여행경보다. level: 0 경보 없음 / 1 여행유의 / 2 여행자제 / 3 출국권고 / 4 여행금지 / null 확인하지 않음. null과 0은 다르다 — 확인 안 한 것을 안전으로 읽으면 안 된다. checked_at이 비어 있으면 아무도 본 적이 없다는 뜻이다. 경보는 수시로 바뀌므로 출발 전 source에서 다시 확인할 것."
 }

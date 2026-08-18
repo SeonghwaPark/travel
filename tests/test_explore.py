@@ -288,3 +288,80 @@ def test_markdown_notes_dropped_destinations():
         "ranking": ranking, "failed": []})
     assert f"상위 {rank_mod.DETAIL_DESTINATIONS}곳만" in md
     assert "나머지 3곳" in md
+
+
+# ── 설경 축 ──
+#
+# "1~2월 어디가 싼가"의 답 1·2위가 마닐라·타이베이로 나오는 건 순위가 틀려서가
+# 아니라 목표가 순위에 없어서다. 설경이 목적이면 스캔 전에 걸러야 한다.
+
+DESTS = {
+    "CTS": {"name": "삿포로", "winter_snow": {"city": 3, "daytrip_min": 0}},
+    "KMQ": {"name": "고마쓰", "winter_snow": {"city": 2, "daytrip_min": 75}},
+    "NGO": {"name": "나고야", "winter_snow": {"city": 0, "daytrip_min": 140}},
+    "MNL": {"name": "마닐라", "winter_snow": {"city": 0, "daytrip_min": None}},
+    "XXX": {"name": "미상"},
+}
+
+
+def test_no_snow_filter_passes_everything_through():
+    kept, dropped = explore_main.filter_by_snow(DESTS)
+    assert kept == DESTS and dropped == []
+
+
+def test_min_snow_keeps_only_cities_with_lying_snow():
+    kept, dropped = explore_main.filter_by_snow(DESTS, min_snow=2)
+    assert sorted(kept) == ["CTS", "KMQ"]
+    assert sorted(c for c, _ in dropped) == ["MNL", "NGO", "XXX"]
+
+
+def test_max_daytrip_keeps_reachable_snow():
+    """나고야는 140분이라 2시간 상한에서 떨어지고, 마닐라는 접근 자체가 불가."""
+    kept, _ = explore_main.filter_by_snow(DESTS, max_daytrip=120)
+    assert sorted(kept) == ["CTS", "KMQ"]
+    kept, _ = explore_main.filter_by_snow(DESTS, max_daytrip=150)
+    assert sorted(kept) == ["CTS", "KMQ", "NGO"]
+
+
+def test_snow_axes_combine_with_and():
+    kept, _ = explore_main.filter_by_snow(DESTS, min_snow=3, max_daytrip=120)
+    assert sorted(kept) == ["CTS"]
+
+
+def test_missing_snow_data_is_dropped_not_assumed():
+    """값이 없는 목적지를 '눈 없음'으로 단정하지 않고, 사유를 남기고 뺀다."""
+    _, dropped = explore_main.filter_by_snow(DESTS, min_snow=1)
+    assert ("XXX", "시내 적설 미상 < 1") in dropped
+
+
+def test_snow_label_keeps_axes_separate():
+    assert rank_mod.snow_label({"city": 3, "daytrip_min": 0}) == "시내 3"
+    assert rank_mod.snow_label({"city": 1, "daytrip_min": 90}) == "시내 1 · 밟기 90분"
+    assert rank_mod.snow_label({"city": 0, "daytrip_min": 140}) == "밟기 140분"
+    assert rank_mod.snow_label({"city": 0, "daytrip_min": None}) == "없음"
+    assert rank_mod.snow_label(None) == "—"
+
+
+def test_snow_label_shows_whichever_is_nearer():
+    """도쿄는 눈을 밟으러 120분이지만 후지산은 90분에 본다 — 가까운 쪽을 보인다."""
+    tokyo = {"city": 1, "daytrip_min": 120, "view_min": 90}
+    assert rank_mod.snow_label(tokyo) == "시내 1 · 조망 90분"
+    nagoya = {"city": 0, "daytrip_min": 140, "view_min": 150}
+    assert rank_mod.snow_label(nagoya) == "밟기 140분"
+    view_only = {"city": 0, "daytrip_min": None, "view_min": 150}
+    assert rank_mod.snow_label(view_only) == "조망 150분"
+
+
+def test_view_filter_keeps_fuji_style_destinations():
+    """설산 조망은 city로도 daytrip으로도 안 잡힌다 — 후지산이 그 경우다."""
+    dests = {
+        "NRT": {"name": "도쿄", "winter_snow": {"city": 1, "daytrip_min": 120,
+                                                "view_min": 90}},
+        "NGO": {"name": "나고야", "winter_snow": {"city": 0, "daytrip_min": 140,
+                                                 "view_min": 150}},
+        "OKA": {"name": "오키나와", "winter_snow": {"city": 0, "daytrip_min": None,
+                                                  "view_min": None}},
+    }
+    kept, dropped = explore_main.filter_by_snow(dests, max_view=120)
+    assert sorted(kept) == ["NRT"]
+    assert ("OKA", "설산 조망 없음 > 120분") in dropped

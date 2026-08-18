@@ -45,12 +45,18 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           python -m watch.main $ARGS
 
+      # 실측이 쌓일 때마다 그래프와 짝지어 소스축 기록을 늘린다.
+      # 수동으로만 돌리면 안 쌓인다 — 실측을 만드는 곳이 짝짓기도 해야 한다.
+      - name: Update source agreement
+        if: ${{ inputs.dry_run != true }}
+        run: python -m explore.agree || echo "agree 실패 — 감시 자체는 계속"
+
       - name: Commit price history
         if: ${{ inputs.dry_run != true }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add history/
+          git add history/ explore/agreement.jsonl
           if git diff --staged --quiet; then
             echo "변경 없음"
           else

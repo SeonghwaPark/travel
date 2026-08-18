@@ -127,7 +127,12 @@ def run():
 
         reasons = rules.evaluate(best["price"], history, w["alert"])
         med_note = f" (관측 {len(history)}회 누적)" if history else " (첫 관측 — 기준선 생성)"
-        print(f"  최저가 {best['price']:,}원{med_note}, 알림사유 {len(reasons)}건")
+        leg = ""
+        if best.get("duration"):
+            leg = f" · {best['duration']}"
+            if best.get("stops") is not None:
+                leg += " 직항" if best["stops"] == 0 else f" 경유{best['stops']}회"
+        print(f"  최저가 {best['price']:,}원{med_note}{leg}, 알림사유 {len(reasons)}건")
 
         record = {
             "at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -136,6 +141,10 @@ def run():
             "ret_date": best["ret_date"],
             "nights": best["nights"],
             "airline": best["airline"],
+            # 소요시간·경유는 조회 결과에 이미 들어 있는데 그동안 버렸다. 그래서
+            # 편도 16시간 경유편과 2시간 45분 직항이 순위표에서 같은 줄에 섰다.
+            "duration": best.get("duration"),
+            "stops": best.get("stops"),
             "reasons": [r["type"] for r in reasons],
         }
         if not args.dry_run:
