@@ -75,6 +75,33 @@ def filter_by_snow(destinations, min_snow=None, max_daytrip=None, max_view=None)
     return kept, dropped
 
 
+def filter_by_advisory(destinations, max_level=None):
+    """외교부 여행경보로 목적지를 거른다. 미확인은 빼지 않되 따로 알린다.
+
+    두바이를 총예산까지 다 계산하고 나서야 3단계(철수권고)인 걸 알았다. 경보는
+    가격보다 먼저 걸러야 하는 조건인데 데이터에 없어서 사람이 나중에 발견했다.
+
+    확인하지 않은 것(level=None)을 안전으로 단정하지 않는다. 빼지는 않되
+    '아무도 본 적 없음'으로 따로 세어 알린다 — 조용히 통과시키면 두바이가
+    또 후보에 오른다.
+    """
+    if max_level is None:
+        return destinations, [], []
+    kept, dropped, unchecked = {}, [], []
+    for code, info in destinations.items():
+        adv = info.get("travel_advisory") or {}
+        lv = adv.get("level")
+        if lv is None:
+            unchecked.append(code)
+            kept[code] = info
+            continue
+        if lv > max_level:
+            dropped.append((code, f"여행경보 {lv}단계({adv.get('label') or '?'}) > {max_level}"))
+            continue
+        kept[code] = info
+    return kept, dropped, unchecked
+
+
 def scan_destination(dest_code, origin, start, end, nights_list, pax):
     """한 목적지를 박수별로 조회. {박수: offers} 반환."""
     out = {}
@@ -106,6 +133,8 @@ def parse_args(argv=None):
                    help="눈을 밟을 수 있는 곳까지 편도 이동 상한(분)")
     p.add_argument("--max-snow-view", type=int, default=None,
                    help="설산 조망 지점까지 편도 이동 상한(분). 후지산처럼 '보는' 설경")
+    p.add_argument("--max-advisory", type=int, default=None,
+                   help="외교부 여행경보 상한(0~4). 예: 1이면 여행유의까지만 남긴다")
     p.add_argument("--workers", type=int, default=3)
     p.add_argument("--tag", default="", help="결과 파일명 (기본: origin-start-end)")
     return p.parse_args(argv)
@@ -139,6 +168,16 @@ def run(argv=None):
                   f"{', '.join(missing)}", flush=True)
         destinations = {c: destinations[c] for c in wanted if c in destinations}
     destinations.pop(a.origin.upper(), None)  # 출발지 자기 자신 제외
+    destinations, adv_dropped, adv_unchecked = filter_by_advisory(
+        destinations, a.max_advisory)
+    if adv_dropped:
+        print(f"[여행경보] {len(adv_dropped)}곳 제외 — "
+              + ", ".join(f"{c}({r})" for c, r in adv_dropped[:5]), flush=True)
+    if adv_unchecked:
+        print(f"[여행경보] 미확인 {len(adv_unchecked)}곳은 통과시켰습니다 "
+              f"({', '.join(adv_unchecked[:8])}{' 외' if len(adv_unchecked) > 8 else ''}). "
+              f"확인 안 한 것은 안전하다는 뜻이 아닙니다 — 0404.go.kr", flush=True)
+
     destinations, snow_dropped = filter_by_snow(
         destinations, a.min_snow, a.max_snow_daytrip, a.max_snow_view)
     if snow_dropped:

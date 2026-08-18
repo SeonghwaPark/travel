@@ -62,6 +62,8 @@ def to_argv(q):
         argv += ["--max-snow-daytrip", str(q["max_snow_daytrip"])]
     if q.get("max_snow_view") is not None:
         argv += ["--max-snow-view", str(q["max_snow_view"])]
+    if q.get("max_advisory") is not None:
+        argv += ["--max-advisory", str(q["max_advisory"])]
     return argv
 
 

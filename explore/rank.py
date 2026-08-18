@@ -74,6 +74,26 @@ def rank(summaries):
                   key=lambda s: (s["best_price"], -s["dip_pct"]))
 
 
+def lodging_season(code, check_in):
+    """그 목적지·그 날짜에 숙박비가 뛰는가. (배수, 사유) 또는 (1.0, None).
+
+    탐색은 항공권만 보고 순위를 낸다. 그래서 눈축제 기간이 싸 보였다 —
+    항공권은 그대로인데 삿포로 숙박이 1.9배로 뛰는 걸 순위가 몰랐다.
+    순위를 바꾸진 않되 표에 띄워서 사람이 함정을 볼 수 있게 한다.
+    """
+    if not check_in:
+        return 1.0, None
+    try:
+        from brief import compose
+        prof = compose.load_profiles()["destinations"].get(code)
+        if not prof:
+            return 1.0, None
+        s = compose.season_multiplier(prof, check_in)
+        return s.get("factor", 1.0), s.get("reason")
+    except Exception:
+        return 1.0, None
+
+
 def snow_label(ws):
     """설경 축을 한 칸에 담는다. 값이 없으면 '—'.
 
@@ -101,6 +121,13 @@ def snow_label(ws):
     if city == 1:
         return "시내 1" + (f" · {near}" if near else "")
     return near or "없음"
+
+
+def _season_cell(row):
+    f, why = lodging_season(row.get("code"), row.get("departure_date"))
+    if f == 1.0:
+        return "—"
+    return f"x{f} {why}" if why else f"x{f}"
 
 
 def _won(n):
@@ -137,19 +164,20 @@ def to_markdown(result, contexts=None):
     has_ctx = any(contexts.get(r["code"]) for r in result["ranking"])
     if has_ctx:
         lines += [
-            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 기간 중앙값 대비 | 과거 스캔 대비 |",
-            "|---|--------|------|-------|------|------|----|------|------------------|----------------|",
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 숙박 | 기간 중앙값 대비 | 과거 스캔 대비 |",
+            "|---|--------|------|-------|------|------|----|------|------|------------------|----------------|",
         ]
     else:
         lines += [
-            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 기간 중앙값 대비 |",
-            "|---|--------|------|-------|------|------|----|------|------------------|",
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 숙박 | 기간 중앙값 대비 |",
+            "|---|--------|------|-------|------|------|----|------|------|------------------|",
         ]
     for i, r in enumerate(result["ranking"], 1):
         dip = f"−{r['dip_pct']}%" if r["dip_pct"] > 0 else "—"
         row = (f"| {i} | {r['name']} ({r['code']}) | {_won(r['best_price'])} | "
                f"{_won(r['per_person'])} | {r['departure_date']} | {r['return_date']} | "
-               f"{r['nights']} | {snow_label(r.get('winter_snow'))} | {dip} |")
+               f"{r['nights']} | {snow_label(r.get('winter_snow'))} | "
+               f"{_season_cell(r)} | {dip} |")
         if has_ctx:
             from . import trend as trend_mod
             row += f" {trend_mod.describe(contexts.get(r['code'])) or '—'} |"
