@@ -288,3 +288,55 @@ def test_markdown_notes_dropped_destinations():
         "ranking": ranking, "failed": []})
     assert f"상위 {rank_mod.DETAIL_DESTINATIONS}곳만" in md
     assert "나머지 3곳" in md
+
+
+# ── 설경 축 ──
+#
+# "1~2월 어디가 싼가"의 답 1·2위가 마닐라·타이베이로 나오는 건 순위가 틀려서가
+# 아니라 목표가 순위에 없어서다. 설경이 목적이면 스캔 전에 걸러야 한다.
+
+DESTS = {
+    "CTS": {"name": "삿포로", "winter_snow": {"city": 3, "daytrip_min": 0}},
+    "KMQ": {"name": "고마쓰", "winter_snow": {"city": 2, "daytrip_min": 75}},
+    "NGO": {"name": "나고야", "winter_snow": {"city": 0, "daytrip_min": 140}},
+    "MNL": {"name": "마닐라", "winter_snow": {"city": 0, "daytrip_min": None}},
+    "XXX": {"name": "미상"},
+}
+
+
+def test_no_snow_filter_passes_everything_through():
+    kept, dropped = explore_main.filter_by_snow(DESTS)
+    assert kept == DESTS and dropped == []
+
+
+def test_min_snow_keeps_only_cities_with_lying_snow():
+    kept, dropped = explore_main.filter_by_snow(DESTS, min_snow=2)
+    assert sorted(kept) == ["CTS", "KMQ"]
+    assert sorted(c for c, _ in dropped) == ["MNL", "NGO", "XXX"]
+
+
+def test_max_daytrip_keeps_reachable_snow():
+    """나고야는 140분이라 2시간 상한에서 떨어지고, 마닐라는 접근 자체가 불가."""
+    kept, _ = explore_main.filter_by_snow(DESTS, max_daytrip=120)
+    assert sorted(kept) == ["CTS", "KMQ"]
+    kept, _ = explore_main.filter_by_snow(DESTS, max_daytrip=150)
+    assert sorted(kept) == ["CTS", "KMQ", "NGO"]
+
+
+def test_snow_axes_combine_with_and():
+    kept, _ = explore_main.filter_by_snow(DESTS, min_snow=3, max_daytrip=120)
+    assert sorted(kept) == ["CTS"]
+
+
+def test_missing_snow_data_is_dropped_not_assumed():
+    """값이 없는 목적지를 '눈 없음'으로 단정하지 않고, 사유를 남기고 뺀다."""
+    _, dropped = explore_main.filter_by_snow(DESTS, min_snow=1)
+    assert ("XXX", "시내 적설 미상 < 1") in dropped
+
+
+def test_snow_label_keeps_city_and_daytrip_separate():
+    assert rank_mod.snow_label({"city": 3, "daytrip_min": 0}) == "시내 3"
+    assert rank_mod.snow_label({"city": 1, "daytrip_min": 90}) == "시내 1 · 당일 90분"
+    assert rank_mod.snow_label({"city": 0, "daytrip_min": 140}) == "당일 140분"
+    assert rank_mod.snow_label({"city": 0, "daytrip_min": None}) == "없음"
+    assert rank_mod.snow_label(None) == "—"

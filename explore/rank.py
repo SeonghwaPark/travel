@@ -57,6 +57,7 @@ def summarize(dest_code, info, offers_by_nights, pax):
         "median_price": median,
         # 그 목적지 안에서 이 날짜가 얼마나 좋은 타이밍인가 (기간 중앙값 대비)
         "dip_pct": round((median - best["price"]) / median * 100, 1) if median else 0.0,
+        "winter_snow": info.get("winter_snow"),
         "observed": len(prices),
         "date_curve": [by_date[d] for d in sorted(by_date)],
     }
@@ -71,6 +72,24 @@ def rank(summaries):
     """최저가 오름차순. 같은 값이면 기간 중앙값 대비 하락폭이 큰 쪽을 앞에 둔다."""
     return sorted((s for s in summaries if s),
                   key=lambda s: (s["best_price"], -s["dip_pct"]))
+
+
+def snow_label(ws):
+    """설경 축을 한 칸에 담는다. 값이 없으면 '—'.
+
+    시내 적설과 당일치기 접근을 한 숫자로 뭉개지 않는다 — 나고야(시내 0·당일 140분)와
+    고마쓰(시내 2·당일 75분)는 같은 점수로 묶이면 안 되는 서로 다른 여행이다.
+    """
+    if not ws:
+        return "—"
+    city, d = ws.get("city"), ws.get("daytrip_min")
+    if city is None:
+        return "—"
+    if city >= 2:
+        return f"시내 {city}"
+    if city == 1:
+        return f"시내 1" + (f" · 당일 {d}분" if d else "")
+    return f"당일 {d}분" if d else "없음"
 
 
 def _won(n):
@@ -107,19 +126,19 @@ def to_markdown(result, contexts=None):
     has_ctx = any(contexts.get(r["code"]) for r in result["ranking"])
     if has_ctx:
         lines += [
-            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 | 과거 스캔 대비 |",
-            "|---|--------|------|-------|------|------|----|------------------|----------------|",
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 기간 중앙값 대비 | 과거 스캔 대비 |",
+            "|---|--------|------|-------|------|------|----|------|------------------|----------------|",
         ]
     else:
         lines += [
-            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 기간 중앙값 대비 |",
-            "|---|--------|------|-------|------|------|----|------------------|",
+            "| # | 목적지 | 총액 | 1인당 | 출발 | 귀국 | 박 | 설경 | 기간 중앙값 대비 |",
+            "|---|--------|------|-------|------|------|----|------|------------------|",
         ]
     for i, r in enumerate(result["ranking"], 1):
         dip = f"−{r['dip_pct']}%" if r["dip_pct"] > 0 else "—"
         row = (f"| {i} | {r['name']} ({r['code']}) | {_won(r['best_price'])} | "
                f"{_won(r['per_person'])} | {r['departure_date']} | {r['return_date']} | "
-               f"{r['nights']} | {dip} |")
+               f"{r['nights']} | {snow_label(r.get('winter_snow'))} | {dip} |")
         if has_ctx:
             from . import trend as trend_mod
             row += f" {trend_mod.describe(contexts.get(r['code'])) or '—'} |"

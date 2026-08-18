@@ -42,6 +42,31 @@ def load_destinations(scope):
     return dict(data["international"])
 
 
+def filter_by_snow(destinations, min_snow=None, max_daytrip=None):
+    """설경 축으로 목적지를 거른다. 거른 결과와 탈락 사유를 함께 돌려준다.
+
+    "1~2월 어디가 싼가"의 답 1·2위가 마닐라·타이베이로 나오는 건 순위가 틀려서가
+    아니라 목표가 순위에 없어서다. 설경이 목적이면 그 조건을 스캔 전에 걸어야
+    한다 — 40곳을 다 훑고 사람이 눈으로 골라내면 그 판단은 어디에도 안 쌓인다.
+
+    두 축은 AND로 걸린다. city가 2 이상이면 daytrip은 0이므로 서로 부딪히지 않는다.
+    """
+    if min_snow is None and max_daytrip is None:
+        return destinations, []
+    kept, dropped = {}, []
+    for code, info in destinations.items():
+        ws = info.get("winter_snow") or {}
+        city, day = ws.get("city"), ws.get("daytrip_min")
+        if min_snow is not None and (city is None or city < min_snow):
+            dropped.append((code, f"시내 적설 {city if city is not None else '미상'} < {min_snow}"))
+            continue
+        if max_daytrip is not None and (day is None or day > max_daytrip):
+            dropped.append((code, f"설경 접근 {day if day is not None else '불가'}분 > {max_daytrip}분"))
+            continue
+        kept[code] = info
+    return kept, dropped
+
+
 def scan_destination(dest_code, origin, start, end, nights_list, pax):
     """한 목적지를 박수별로 조회. {박수: offers} 반환."""
     out = {}
@@ -67,6 +92,10 @@ def parse_args(argv=None):
                    choices=["international", "domestic", "all"])
     p.add_argument("--only", default="", help="특정 목적지 코드만, 예: NRT,KIX,FUK")
     p.add_argument("--limit", type=int, default=0, help="목적지 수 상한 (0=전체)")
+    p.add_argument("--min-snow", type=int, default=None,
+                   help="시내 적설 최소치(0~3). 예: 2면 겨울 내내 쌓이는 곳만")
+    p.add_argument("--max-snow-daytrip", type=int, default=None,
+                   help="설경까지 편도 이동 상한(분). 예: 120이면 2시간 안에 눈을 볼 수 있는 곳만")
     p.add_argument("--workers", type=int, default=3)
     p.add_argument("--tag", default="", help="결과 파일명 (기본: origin-start-end)")
     return p.parse_args(argv)
@@ -84,7 +113,7 @@ def run(argv=None):
     if span > gflights.MAX_RANGE_DAYS:
         end = start.fromordinal(start.toordinal() + gflights.MAX_RANGE_DAYS - 1)
         print(f"[알림] 기간이 {span}일이라 가격 그래프 상한인 "
-              f"{gflights.MAX_RANGE_DAYS}일로 줄입니다 → {end:%Y-%m-%d}")
+              f"{gflights.MAX_RANGE_DAYS}일로 줄입니다 → {end:%Y-%m-%d}", flush=True)
     start_s, end_s = start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
 
     nights_list = [int(x) for x in a.nights.split(",") if x.strip()]
@@ -96,9 +125,16 @@ def run(argv=None):
         wanted = [c.strip().upper() for c in a.only.split(",") if c.strip()]
         missing = [c for c in wanted if c not in destinations]
         if missing:
-            print(f"[알림] destinations.json에 없는 코드는 건너뜁니다: {', '.join(missing)}")
+            print(f"[알림] destinations.json에 없는 코드는 건너뜁니다: "
+                  f"{', '.join(missing)}", flush=True)
         destinations = {c: destinations[c] for c in wanted if c in destinations}
     destinations.pop(a.origin.upper(), None)  # 출발지 자기 자신 제외
+    destinations, snow_dropped = filter_by_snow(
+        destinations, a.min_snow, a.max_snow_daytrip)
+    if snow_dropped:
+        print(f"[설경 필터] {len(snow_dropped)}곳 제외 "
+              f"({', '.join(c for c, _ in snow_dropped[:8])}"
+              f"{' 외' if len(snow_dropped) > 8 else ''})", flush=True)
     if a.limit:
         destinations = dict(list(destinations.items())[:a.limit])
     if not destinations:
@@ -110,7 +146,7 @@ def run(argv=None):
     total_reqs = len(destinations) * len(nights_list)
     print(f"▶ {a.origin} 출발 | {start_s} ~ {end_s} | "
           f"{', '.join(str(n) + '박' for n in nights_list)} | "
-          f"목적지 {len(destinations)}곳 → 요청 {total_reqs}건")
+          f"목적지 {len(destinations)}곳 → 요청 {total_reqs}건", flush=True)
 
     summaries, failed = [], []
     with ThreadPoolExecutor(max_workers=a.workers) as ex:
