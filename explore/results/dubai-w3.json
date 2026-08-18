@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "origin": "ICN",
+    "start": "2027-07-20",
+    "end": "2027-12-27",
+    "nights": [
+      5,
+      6,
+      7
+    ],
+    "adults": 2,
+    "children": 1,
+    "infants": 0,
+    "scope": "international",
+    "scanned": 1,
+    "scanned_at": "2026-08-18 13:45:43",
+    "price_note": "Google Flights 표시가(왕복, 전체 승객 합계). 실제 결제가는 예약처에서 확인 필요."
+  },
+  "ranking": [],
+  "failed": [
+    "DXB"
+  ]
+}

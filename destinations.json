@@ -449,6 +449,50 @@
         "view_of": null,
         "note": "열대"
       }
+    },
+    "BNE": {
+      "name": "브리즈번",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 1~2월은 아열대 우기라 소나기·습도가 높다"
+      }
+    },
+    "OOL": {
+      "name": "골드코스트",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 서핑·테마파크, 1~2월 우기"
+      }
+    },
+    "MEL": {
+      "name": "멜버른",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 날씨 변덕이 심하기로 유명"
+      }
+    },
+    "CNS": {
+      "name": "케언즈",
+      "country": "호주",
+      "winter_snow": {
+        "city": 0,
+        "daytrip_min": null,
+        "view_min": null,
+        "view_of": null,
+        "note": "남반구 한여름. 1~2월은 우기·사이클론 시즌이라 그레이트배리어리프 투어가 자주 결항"
+      }
     }
   },
   "domestic": {
