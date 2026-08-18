@@ -159,3 +159,39 @@ def test_booking_url_encodes_passengers():
     url = booking_url("ICN", "CTS", "2027-02-21", "2027-02-26", 2, 1, 0)
     assert "curr=KRW" in url
     assert "2%20adults" in url and "1%20children" in url
+
+
+# ── 확정안 대비 하락 ──
+#
+# 일정을 정한 뒤에는 "역대 최저인가"보다 "내가 사려던 값보다 싼가"가 실질적인
+# 질문이다. 목표가를 그래프값으로 잡았다가 실측이 9.8% 비싸서, 웬만한 하락은
+# 조용히 지나가는 상태였다.
+
+BASE = {"price": 2130600, "measured_at": "2026-08-18"}
+
+
+def test_baseline_drop_fires():
+    r = rules.evaluate(2020000, [], {"baseline_pct": 2}, baseline=BASE)
+    assert [x["type"] for x in r] == ["baseline"]
+    assert "5.2% 저렴" in r[0]["text"] and "110,600원 절약" in r[0]["text"]
+
+
+def test_small_drop_below_threshold_is_quiet():
+    """1% 빠진 걸로 알리면 알림이 노이즈가 된다."""
+    assert rules.evaluate(2110000, [], {"baseline_pct": 2}, baseline=BASE) == []
+
+
+def test_price_above_baseline_is_quiet():
+    assert rules.evaluate(2200000, [], {"baseline_pct": 2}, baseline=BASE) == []
+
+
+def test_no_baseline_skips_the_rule():
+    """baseline이 없는 감시는 종전대로 동작한다."""
+    assert rules.evaluate(100, [], {}) == []
+
+
+def test_baseline_stacks_with_other_reasons():
+    """확정안보다 싸면서 목표가도 달성하면 둘 다 알린다."""
+    r = rules.evaluate(2000000, [], {"target_price": 2020000, "baseline_pct": 2},
+                       baseline=BASE)
+    assert sorted(x["type"] for x in r) == ["baseline", "target"]
