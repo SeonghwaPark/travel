@@ -14,7 +14,6 @@ from pydantic import BaseModel
 import asyncio
 import json
 import os
-import re  # AI 플래너 응답의 코드펜스 제거에 사용
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import quote
 from dotenv import load_dotenv
@@ -28,6 +27,7 @@ groq_client = Groq(api_key=os.getenv("GROQ_API_KEY")) if os.getenv("GROQ_API_KEY
 # 스크래핑 코어는 gflights로 분리 — 감시 봇(watch/)도 같은 코드를 쓴다
 import lodging
 import transport
+import trip_rag  # AI 플래너 접지 — 리포의 정제 데이터를 프롬프트에 끼운다
 
 from gflights import (
     MAX_RANGE_DAYS,
@@ -856,13 +856,29 @@ class TripPlanRequest(BaseModel):
 
 @app.post("/api/trip/generate")
 async def generate_trip_plan(req: TripPlanRequest):
+    # 접지: 리포의 정제 데이터(숙박 구역·프로필·교통·달력)에서 이 여행에
+    # 해당하는 부분만 골라 프롬프트에 넣는다. 없으면 빈 문자열이라 무해하다.
+    context, grounding, n_days = trip_rag.build_context(
+        req.destination, req.start_date, req.end_date)
+    context_block = ""
+    if context:
+        context_block = f"""
+--- 참고 데이터 (이 서비스가 관리하는 실측·정제 값) ---
+{context}
+--- 참고 데이터 끝 ---
+
+참고 데이터가 있는 항목(숙소 구역, 교통 요금, 시즌 특성, 요일·공휴일)은 반드시
+그 값을 따르세요. 참고 데이터에 없는 가격은 지어내지 말고 "약 15,000원"처럼
+어림값임이 드러나게 쓰세요.
+"""
+
     prompt = f"""당신은 한국 여행 전문가입니다. 다음 조건에 맞는 상세한 여행 일정을 만들어주세요.
 
 여행지: {req.destination}
 기간: {req.start_date} ~ {req.end_date}
 인원: {req.travelers}
 {f'선호사항: {req.preferences}' if req.preferences else ''}
-
+{context_block}
 반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트 없이 JSON만 출력하세요:
 {{
   "title": "여행 제목",
@@ -913,12 +929,14 @@ async def generate_trip_plan(req: TripPlanRequest):
         {"role": "user", "content": prompt},
     ]
 
-    # OpenAI 우선 시도, 실패 시 Groq fallback
+    # OpenAI 우선 시도, 실패 시 Groq fallback.
+    # max_tokens는 일수에 비례 — 고정 6000이면 긴 일정에서 JSON이 잘린다.
+    max_tokens = trip_rag.plan_max_tokens(n_days)
     providers = []
     if openai_client:
-        providers.append(("openai", openai_client, "gpt-4o-mini", 6000))
+        providers.append(("openai", openai_client, "gpt-4o-mini"))
     if groq_client:
-        providers.append(("groq", groq_client, "llama-3.3-70b-versatile", 6000))
+        providers.append(("groq", groq_client, "llama-3.3-70b-versatile"))
 
     if not providers:
         raise HTTPException(status_code=500, detail="AI API 키가 설정되지 않았습니다. .env 파일을 확인하세요.")
@@ -926,33 +944,31 @@ async def generate_trip_plan(req: TripPlanRequest):
     loop = asyncio.get_event_loop()
     last_error = None
 
-    for provider_name, client, model, max_tokens in providers:
+    for provider_name, client, model in providers:
         try:
             for attempt in range(2):
+                # JSON 모드: 두 제공자 모두 지원한다. 코드펜스·잡담이 줄어
+                # 파싱 실패로 인한 재시도(비용·지연)가 크게 준다.
                 response = await loop.run_in_executor(
                     None,
-                    lambda c=client, m=model, mt=max_tokens: c.chat.completions.create(
+                    lambda c=client, m=model: c.chat.completions.create(
                         model=m,
                         messages=messages,
                         temperature=0.5,
-                        max_tokens=mt,
+                        max_tokens=max_tokens,
+                        response_format={"type": "json_object"},
+                        timeout=90,
                     ),
                 )
-                content = response.choices[0].message.content.strip()
-
-                if content.startswith("```"):
-                    content = re.sub(r"^```(?:json)?\s*", "", content)
-                    content = re.sub(r"\s*```$", "", content)
-
-                try:
-                    plan = json.loads(content)
+                plan = trip_rag.salvage_json(response.choices[0].message.content)
+                if plan is not None:
                     plan["_provider"] = provider_name
+                    plan["_grounding"] = grounding
                     return plan
-                except json.JSONDecodeError:
-                    if attempt == 0:
-                        continue
-                    last_error = f"{provider_name}: JSON 파싱 실패"
-                    break
+                if attempt == 0:
+                    continue
+                last_error = f"{provider_name}: JSON 파싱 실패"
+                break
         except Exception as e:
             last_error = f"{provider_name}: {str(e)}"
             print(f"[Trip AI] {provider_name} 실패: {e}")

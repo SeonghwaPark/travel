@@ -11,6 +11,10 @@ const DESTINATIONS = [
   { group: '전라', items: ['전주', '목포', '담양', '순천'] },
   { group: '충청', items: ['대전', '단양', '보령'] },
   { group: '수도권', items: ['서울', '인천', '가평'] },
+  // 해외는 숙박 구역 가이드·목적지 프로필 등 정제 데이터가 있는 곳만 넣는다
+  // — AI가 그 데이터에 접지해 일정을 짠다 (lodging_areas.json, trip_profiles.json)
+  { group: '일본', items: ['삿포로', '하코다테', '아오모리', '센다이', '도쿄', '나고야', '가나자와', '오사카', '후쿠오카', '오키나와'] },
+  { group: '아시아·해외', items: ['타이베이', '가오슝', '홍콩', '세부', '괌', '두바이', '시드니', '뉴욕'] },
 ]
 
 const CATEGORY_COLORS = {
@@ -175,6 +179,11 @@ function TripPlanner() {
                 </span>
               )}
             </div>
+            {plan._grounding?.sources?.length > 0 && (
+              <p style={{ marginTop: '10px', fontSize: '0.76rem', opacity: 0.75 }}>
+                실측·정제 데이터 기반: {plan._grounding.sources.join(' · ')}
+              </p>
+            )}
           </div>
 
           {/* 날짜별 일정 */}
