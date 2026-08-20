@@ -12,3 +12,4 @@
 {"at": "2026-08-18 12:34:48", "best_price": 1566600, "dep_date": "2027-02-16", "ret_date": "2027-02-23", "nights": 7, "airline": "Jeju Air", "duration": "2 hr 45 min", "stops": 0, "reasons": []}
 {"at": "2026-08-19 00:55:16", "best_price": 1566600, "dep_date": "2027-02-16", "ret_date": "2027-02-23", "nights": 7, "airline": "Jeju Air", "duration": "2 hr 45 min", "stops": 0, "reasons": []}
 {"at": "2026-08-19 12:35:24", "best_price": 1566600, "dep_date": "2027-02-16", "ret_date": "2027-02-23", "nights": 7, "airline": "Jeju Air", "duration": "2 hr 45 min", "stops": 0, "reasons": []}
+{"at": "2026-08-20 00:54:42", "best_price": 1565100, "dep_date": "2027-02-16", "ret_date": "2027-02-23", "nights": 7, "airline": "Jeju Air", "duration": "2 hr 45 min", "stops": 0, "reasons": ["atl"]}
